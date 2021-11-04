@@ -1,0 +1,7 @@
+*~
+.composer-downloads
+/.idea
+/bin/box
+/bin/citges.phar
+/bin/phpunit
+/vendor

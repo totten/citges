@@ -1,0 +1,38 @@
+{
+    "name": "civicrm/citges",
+    "authors": [
+        {
+            "name": "Tim Otten",
+            "email": "totten@civicrm.org"
+        }
+    ],
+    "config": {
+        "platform": {
+            "php": "7.2"
+        },
+        "bin-dir": "bin"
+    },
+    "autoload": {
+        "psr-4": {
+            "Civi\\Citges\\": "src/"
+         }
+    },
+    "require": {
+        "php": "~7.2 || ~8.0",
+        "civicrm/composer-downloads-plugin": "~2.1|^3",
+        "react/http": "^1.5",
+        "react/child-process": "^0.6.4",
+        "react/promise": "^2.8",
+        "symfony/console": "~4.4"
+    },
+    "extra": {
+        "downloads": {
+            "box": {
+                "version": "3.8.4",
+                "url": "https://github.com/humbug/box/releases/download/{$version}/box.phar",
+                "path": "bin/{$id}",
+                "type": "phar"
+            }
+        }
+    }
+}
