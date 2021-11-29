@@ -3,8 +3,10 @@
 namespace Civi\Citges;
 
 use Civi\Citges\Util\ChattyTrait;
+use Civi\Citges\Util\LifetimeStatsTrait;
 use Civi\Citges\Util\LineReader;
 use React\EventLoop\Loop;
+use React\Promise\Deferred;
 
 /**
  * Setup a pipe-based connection. This starts the subprocess and provides a
@@ -18,6 +20,7 @@ use React\EventLoop\Loop;
 class PipeConnection {
 
   use ChattyTrait;
+  use LifetimeStatsTrait;
 
   const INTERVAL = 0.1;
 
@@ -59,12 +62,14 @@ class PipeConnection {
    */
   public function start(): void {
     $this->verbose("Run: %s\n", $this->command);
+    $this->startTime = microtime(TRUE);
     $this->process = new \React\ChildProcess\Process($this->command);
     $this->process->start();
     // $this->process->stdin->on('data', [$this, 'onReceive']);
     $this->lineReader = new LineReader($this->process->stdout, $this->delimiter);
     $this->process->stderr->on('data', [$this, 'onReceiveError']);
     $this->process->on('exit', function ($exitCode, $termSignal) {
+      $this->endTime = microtime(TRUE);
       if ($this->deferred !== NULL) {
         $oldDeferred = $this->deferred;
         $this->deferred = NULL;
@@ -80,37 +85,30 @@ class PipeConnection {
    * request while the first remains pending, it will be rejected.
    *
    * @param string $requestLine
+   *
    * @return \React\Promise\PromiseInterface
    *   Promise produces a `string` for the one-line response.
    * @throws \Exception
    */
   public function run($requestLine): \React\Promise\PromiseInterface {
-    if (!$this->process->isRunning()) {
-      $this->verbose("Worker disappeared. Cannot send: $requestLine\n");
-      $deferred = new \React\Promise\Deferred();
-      $deferred->reject("Worker disappeared. Cannot send: $requestLine\n");
-      return $deferred->promise();
-    }
+    $this->requestCount++;
+    $deferred = $this->reserveDeferred();
 
-    if (!$this->isAvailable()) {
-      $this->verbose('Cannot run command. Worker is busy.');
-      $deferred = new \React\Promise\Deferred();
-      $deferred->reject('Cannot run command. Worker is busy.');
+    if (!$this->process->isRunning()) {
+      $this->releaseDeferred();
+      $deferred->reject("Worker disappeared. Cannot send: $requestLine");
       return $deferred->promise();
     }
 
     $this->verbose("Send %s\n", $requestLine);
-    $this->deferred = new \React\Promise\Deferred();
     $this->lineReader->once('readline', function ($responseLine) {
-      // Handle this - unless someone else has intervened (eg stop() or on('exit')).
+      // Handle this response - unless someone else has intervened (eg stop() or on('exit')).
       if ($this->deferred) {
-        $oldDeferred = $this->deferred;
-        $this->deferred = NULL;
-        $oldDeferred->resolve($responseLine);
+        $this->releaseDeferred()->resolve($responseLine);
       }
     });
     $this->process->stdin->write($requestLine . $this->delimiter);
-    return $this->deferred->promise();
+    return $deferred->promise();
   }
 
   /**
@@ -133,7 +131,7 @@ class PipeConnection {
     }
 
     $forceAt = microtime(TRUE) + $forceTimeout;
-    $timer = Loop::addPeriodicTimer(static::INTERVAL, function() use (&$timer, $forceAt) {
+    $timer = Loop::addPeriodicTimer(static::INTERVAL, function () use (&$timer, $forceAt) {
       // $this->verbose("Check status...\n");
       if (!$this->process->isRunning()) {
         Loop::cancelTimer($timer);
@@ -167,6 +165,32 @@ class PipeConnection {
     }
 
     $this->verbose('STDERR: ' . $data);
+  }
+
+  /**
+   * Reserve this worker. Set the stub for the pending request
+   * ($this->deferred).
+   *
+   * @return \React\Promise\Deferred
+   */
+  private function reserveDeferred(): Deferred {
+    if ($this->deferred !== NULL) {
+      throw new \RuntimeException("Cannot send request. Worker is busy.");
+    }
+
+    $this->deferred = new \React\Promise\Deferred();
+    return $this->deferred;
+  }
+
+  /**
+   * Release this worker. Unset the pending request ($this->deferred).
+   *
+   * @return \React\Promise\Deferred
+   */
+  private function releaseDeferred(): Deferred {
+    $oldDeferred = $this->deferred;
+    $this->deferred = NULL;
+    return $oldDeferred;
   }
 
 }
