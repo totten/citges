@@ -67,6 +67,7 @@ class PipeConnection {
     $this->process->start();
     // $this->process->stdin->on('data', [$this, 'onReceive']);
     $this->lineReader = new LineReader($this->process->stdout, $this->delimiter);
+    $this->lineReader->on('readline', [$this, 'onReadLine']);
     $this->process->stderr->on('data', [$this, 'onReceiveError']);
     $this->process->on('exit', function ($exitCode, $termSignal) {
       $this->endTime = microtime(TRUE);
@@ -101,12 +102,6 @@ class PipeConnection {
     }
 
     $this->verbose("Send %s\n", $requestLine);
-    $this->lineReader->once('readline', function ($responseLine) {
-      // Handle this response - unless someone else has intervened (eg stop() or on('exit')).
-      if ($this->deferred) {
-        $this->releaseDeferred()->resolve($responseLine);
-      }
-    });
     $this->process->stdin->write($requestLine . $this->delimiter);
     return $deferred->promise();
   }
@@ -158,6 +153,23 @@ class PipeConnection {
     return $this->deferred === NULL && $this->process->isRunning();
   }
 
+  /**
+   * @param string $responseLine
+   * @internal
+   */
+  public function onReadLine(string $responseLine): void {
+    if ($this->deferred) {
+      $this->releaseDeferred()->resolve($responseLine);
+    }
+    else {
+      $this->verbose("Received unexpected response line: $responseLine");
+    }
+  }
+
+  /**
+   * @param $data
+   * @internal
+   */
   public function onReceiveError($data): void {
     if ($data === NULL || $data === '') {
       // $this->verbose("[%s @ %d]: Ignore blank %s\n", static::CLASS, posix_getpid(), $data);
