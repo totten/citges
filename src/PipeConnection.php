@@ -5,8 +5,9 @@ namespace Civi\Citges;
 use Civi\Citges\Util\ChattyTrait;
 use Civi\Citges\Util\LifetimeStatsTrait;
 use Civi\Citges\Util\LineReader;
-use React\EventLoop\Loop;
+use Civi\Citges\Util\ProcessUtil;
 use React\Promise\Deferred;
+use React\Promise\PromiseInterface;
 
 /**
  * Setup a pipe-based connection. This starts the subprocess and provides a
@@ -21,8 +22,6 @@ class PipeConnection {
 
   use ChattyTrait;
   use LifetimeStatsTrait;
-
-  const INTERVAL = 0.1;
 
   private $delimiter = "\n";
 
@@ -109,39 +108,22 @@ class PipeConnection {
   /**
    * Shutdown the worker.
    *
-   * If there is a pending request, it will likely be aborted and report failure.
+   * If there is a pending request, it may be aborted and may report failure.
    *
-   * @param float $forceTimeout
-   *   If process doesn't stop with SIGTERM within $N seconds, then use
-   *   SIGKILL.
+   * @param float $timeout
+   *   stop() will initially try a gentle shutdown by closing STDIN.
+   *   If it doesn't end within $timeout, it will escalate the means of stopping.
+   * @return \React\Promise\PromiseInterface
+   *   A promise that returns once shutdown is complete.
+   * @throws RuntimeException
+   *   If you attempt to stop multiple times, subsequent calls will throw an exception.
    */
-  public function stop($forceTimeout = 1.0): void {
-    if (!$this->process->isRunning()) {
-      return;
+  public function stop(float $timeout = 1.5): PromiseInterface {
+    if ($this->moribund) {
+      throw new \RuntimeException("Process is already stopping or stopped.");
     }
-
-    $this->process->terminate(defined('SIGTERM') ? SIGTERM : 15);
-    if (!$this->process->isRunning()) {
-      return;
-    }
-
-    $forceAt = microtime(TRUE) + $forceTimeout;
-    $timer = Loop::addPeriodicTimer(static::INTERVAL, function () use (&$timer, $forceAt) {
-      // $this->verbose("Check status...\n");
-      if (!$this->process->isRunning()) {
-        Loop::cancelTimer($timer);
-        return;
-      }
-
-      if (microtime(TRUE) > $forceAt) {
-        $this->verbose("Terminate!\n");
-        $this->process->terminate(defined('SIGKILL') ? SIGKILL : 9);
-        Loop::cancelTimer($timer);
-      }
-    });
-
-    Loop::addTimer($forceTimeout, function () {
-    });
+    $this->setMoribund(TRUE);
+    return ProcessUtil::terminateWithEscalation($this->process, $timeout);
   }
 
   /**

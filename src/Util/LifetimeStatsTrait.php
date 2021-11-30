@@ -19,6 +19,8 @@ trait LifetimeStatsTrait {
    */
   protected $requestCount = 0;
 
+  protected $moribund = FALSE;
+
   /**
    * @return float|null
    */
@@ -38,6 +40,33 @@ trait LifetimeStatsTrait {
    */
   public function getRequestCount(): int {
     return $this->requestCount;
+  }
+
+  /**
+   * @return bool
+   */
+  public function isMoribund(): bool {
+    return $this->moribund;
+  }
+
+  /**
+   * @param bool $moribund
+   */
+  public function setMoribund(bool $moribund): void {
+    $this->moribund = $moribund;
+  }
+
+  public function isExhausted(array $policy): bool {
+    if ($this->moribund) {
+      return TRUE;
+    }
+    if ($this->requestCount > $policy['maxRequests']) {
+      return TRUE;
+    }
+    if ($this->startTime + $policy['maxDuration'] > microtime(TRUE)) {
+      return TRUE;
+    }
+    return FALSE;
   }
 
 }
