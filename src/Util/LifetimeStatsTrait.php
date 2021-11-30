@@ -2,6 +2,8 @@
 
 namespace Civi\Citges\Util;
 
+use Civi\Citges\Configuration;
+
 trait LifetimeStatsTrait {
 
   /**
@@ -56,14 +58,14 @@ trait LifetimeStatsTrait {
     $this->moribund = $moribund;
   }
 
-  public function isExhausted(array $policy): bool {
+  public function isExhausted(Configuration $configuration): bool {
     if ($this->moribund) {
       return TRUE;
     }
-    if ($this->requestCount > $policy['maxRequests']) {
+    if ($this->requestCount > $configuration->maxRequests) {
       return TRUE;
     }
-    if ($this->startTime + $policy['maxDuration'] > microtime(TRUE)) {
+    if ($this->startTime + $configuration->maxDuration > microtime(TRUE)) {
       return TRUE;
     }
     return FALSE;

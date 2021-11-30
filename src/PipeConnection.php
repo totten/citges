@@ -15,7 +15,7 @@ use React\Promise\PromiseInterface;
  * method to send one-line requests and receive one-line responses.
  *
  * ```php
- * $p = new PipeConnection('cv ev "Civi::pipe();"')
+ * $p = new PipeConnection(new Configuration('cv ev "Civi::pipe();"');
  * $p->send('SOME COMMAND')->then(function($response){...});
  * ```
  */
@@ -36,15 +36,12 @@ class PipeConnection {
    */
   public $context;
 
-  private $delimiter = "\n";
-
   /**
-   * External command used to start the pipe.
-   *
-   * @var string
-   *   Ex: 'cv ev "Civi::pipe();"'
+   * @var Configuration
    */
-  protected $command;
+  public $configuration;
+
+  private $delimiter = "\n";
 
   /**
    * @var \React\ChildProcess\Process
@@ -64,28 +61,28 @@ class PipeConnection {
    */
   protected $deferred;
 
-  public function __construct(string $command, ?string $context = NULL) {
+  public function __construct(Configuration $configuration, ?string $context = NULL) {
     $this->id = IdUtil::next();
     $this->context = $context;
-    $this->command = $command;
+    $this->configuration = $configuration;
     $this->deferred = NULL;
   }
 
   /**
    * Launch the worker process.
    *
-   * @return PromiseInterface
+   * @return \React\Promise\PromiseInterface
    *   The promise returns when the pipe starts.
    *   It will report the welcome line.
    */
   public function start(): PromiseInterface {
-    $this->verbose("Run: %s\n", $this->command);
+    $this->verbose("Run: %s\n", $this->configuration->pipeCommand);
     $this->startTime = microtime(TRUE);
 
     // We will receive a 1-line welcome which signals that startup has finished.
     $this->reserveDeferred();
 
-    $this->process = new \React\ChildProcess\Process($this->command);
+    $this->process = new \React\ChildProcess\Process($this->configuration->pipeCommand);
     $this->process->start();
     // $this->process->stdin->on('data', [$this, 'onReceive']);
     $this->lineReader = new LineReader($this->process->stdout, $this->delimiter);
