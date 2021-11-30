@@ -3,6 +3,7 @@
 namespace Civi\Citges;
 
 use Civi\Citges\Util\ChattyTrait;
+use Civi\Citges\Util\IdUtil;
 use Civi\Citges\Util\LifetimeStatsTrait;
 use Civi\Citges\Util\LineReader;
 use Civi\Citges\Util\ProcessUtil;
@@ -22,6 +23,18 @@ class PipeConnection {
 
   use ChattyTrait;
   use LifetimeStatsTrait;
+
+  /**
+   * @var int
+   * @readonly
+   */
+  public $id;
+
+  /**
+   * @var string
+   * @readonly
+   */
+  public $context;
 
   private $delimiter = "\n";
 
@@ -51,17 +64,27 @@ class PipeConnection {
    */
   protected $deferred;
 
-  public function __construct($command) {
+  public function __construct(string $command, ?string $context = NULL) {
+    $this->id = IdUtil::next();
+    $this->context = $context;
     $this->command = $command;
     $this->deferred = NULL;
   }
 
   /**
    * Launch the worker process.
+   *
+   * @return PromiseInterface
+   *   The promise returns when the pipe starts.
+   *   It will report the welcome line.
    */
-  public function start(): void {
+  public function start(): PromiseInterface {
     $this->verbose("Run: %s\n", $this->command);
     $this->startTime = microtime(TRUE);
+
+    // We will receive a 1-line welcome which signals that startup has finished.
+    $this->reserveDeferred();
+
     $this->process = new \React\ChildProcess\Process($this->command);
     $this->process->start();
     // $this->process->stdin->on('data', [$this, 'onReceive']);
@@ -76,6 +99,8 @@ class PipeConnection {
         $oldDeferred->reject('Process exited');
       }
     });
+
+    return $this->deferred->promise();
   }
 
   /**
@@ -127,12 +152,21 @@ class PipeConnection {
   }
 
   /**
-   * Is this agent able to accept requests?
+   * Is the agent currently idle - or busy with a request?
    *
    * @return bool
    */
-  public function isAvailable(): bool {
-    return $this->deferred === NULL && $this->process->isRunning();
+  public function isIdle(): bool {
+    return $this->deferred === NULL;
+  }
+
+  /**
+   * Is the agent currently online?
+   *
+   * @return bool
+   */
+  public function isRunning(): bool {
+    return $this->process->isRunning();
   }
 
   /**
