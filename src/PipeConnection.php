@@ -62,7 +62,7 @@ class PipeConnection {
   protected $deferred;
 
   public function __construct(Configuration $configuration, ?string $context = NULL) {
-    $this->id = IdUtil::next();
+    $this->id = IdUtil::next(__CLASS__);
     $this->context = $context;
     $this->configuration = $configuration;
     $this->deferred = NULL;
@@ -76,7 +76,7 @@ class PipeConnection {
    *   It will report the welcome line.
    */
   public function start(): PromiseInterface {
-    $this->verbose("Run: %s\n", $this->configuration->pipeCommand);
+    $this->verbose("Starting: %s\n", $this->configuration->pipeCommand);
     $this->startTime = microtime(TRUE);
 
     // We will receive a 1-line welcome which signals that startup has finished.
@@ -97,6 +97,7 @@ class PipeConnection {
       }
     });
 
+    $this->verbose("Forked\n");
     return $this->deferred->promise();
   }
 
@@ -118,6 +119,7 @@ class PipeConnection {
 
     if (!$this->process->isRunning()) {
       $this->releaseDeferred();
+      $this->verbose("Worker disappeared. Cannot send: $requestLine");
       $deferred->reject("Worker disappeared. Cannot send: $requestLine");
       return $deferred->promise();
     }
@@ -145,7 +147,12 @@ class PipeConnection {
       throw new \RuntimeException("Process is already stopping or stopped.");
     }
     $this->setMoribund(TRUE);
-    return ProcessUtil::terminateWithEscalation($this->process, $timeout);
+    $this->verbose("Stopping\n");
+    return ProcessUtil::terminateWithEscalation($this->process, $timeout)
+      ->then(function($data) {
+        $this->verbose("Stopped\n");
+        return $data;
+      });
   }
 
   /**
@@ -175,7 +182,7 @@ class PipeConnection {
       $this->releaseDeferred()->resolve($responseLine);
     }
     else {
-      $this->verbose("Received unexpected response line: $responseLine");
+      $this->verbose("Received unexpected response line: %s\n", $responseLine);
     }
   }
 
@@ -216,6 +223,17 @@ class PipeConnection {
     $oldDeferred = $this->deferred;
     $this->deferred = NULL;
     return $oldDeferred;
+  }
+
+  protected function verbose($msg, ...$args): void {
+    $msg = '[%.1f #%d %s #%d-%s] ' . $msg;
+    array_unshift($args,
+      microtime(TRUE),
+      posix_getpid(),
+      static::CLASS,
+      $this->id,
+      $this->process ? $this->process->getPid() : '?');
+    call_user_func('printf', $msg, ...$args);
   }
 
 }
