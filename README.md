@@ -26,11 +26,11 @@ sudo chmod +x /usr/local/bin/citges
 The `citges run` command connects to CiviCRM, requests pending tasks, and executes them. This requires a communication channel, and each communication
 channel has different properties:
 
-| Communication Channel | Description | Compatibility | Latency | Resource Limits |
+| Communication Channel | Description | Compatibility | Latency | RAM/CPU Limits |
 | -- | -- | -- | -- | -- |
-| `web` | Send HTTP requests to a remote CiviCRM web server. | All web servers | High latency | RAM and CPU limits determined by web-server |
-| `pipe` (local) | Send bidirectional messages to a long-running CiviCRM process. | Servers with full sysadmin access | Low latency | RAM and CPU limits may be tuned |
-| `pipe` (SSH) | Send bidirectional messages to a long-running CiviCRM process. | Remote servers with SSH access | Mixed (slow startup; fast incremental messages) | RAM and CPU limits may be tuned |
+| `web` | Send HTTP requests to a remote CiviCRM web server. | All web servers | Medium-high latency | Assigned by web-server |
+| `pipe` (local) | Send bidirectional messages to a long-running CiviCRM process. | Servers with full sysadmin access | Low latency | Configurable |
+| `pipe` (SSH/etc) | Send bidirectional messages to a long-running CiviCRM process. | Remote servers with SSH access (or similar) | Mixed (high-latency setup; low-latency message) | Configurable |
 
 ### Usage: HTTP
 
@@ -106,10 +106,11 @@ $ cv ev 'Civi::pipe();'
 
 ## Usage: Hybrid Pipe-HTTP
 
-In this example, we use an SSH pipe to poll for tasks - but the tasks are executed via web request.
+In this example, we monitor for new tasks with a long-running SSH pipe, and then
+execute specific tasks with medium-latency HTTPS requests.
 
 ```bash
-citges run --pipe='ssh webuser@backend.example.com cv ev --cwd=/var/www/example.com/web ev "Civi::pipe();"' \
-  --web='https://user:pass@example.com/civicrm/queue' \
-  --channel=pipe,web
+citges run --channel=pipe,web \
+  --pipe='ssh webuser@backend.example.com cv ev --cwd=/var/www/example.com/web ev "Civi::pipe();"' \
+  --web='https://user:pass@example.com/civicrm/queue'
 ```
