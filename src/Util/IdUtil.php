@@ -4,10 +4,11 @@ namespace Civi\Citges\Util;
 
 class IdUtil {
 
-  private static $id = 1;
+  private static $id = [];
 
-  public static function next(): int {
-    return static::$id++;
+  public static function next(string $set = ''): int {
+    static::$id[$set] = 1 + (static::$id[$set] ?? 0);
+    return static::$id[$set];
   }
 
 }
