@@ -3,7 +3,9 @@
 namespace Civi\Citges;
 
 use Civi\Citges\Util\FunctionUtil;
+use Civi\Citges\Util\IdUtil;
 use Civi\Citges\Util\PromiseUtil;
+use Monolog\Logger;
 use React\EventLoop\Loop;
 use React\Promise\PromiseInterface;
 use function React\Promise\all;
@@ -12,6 +14,12 @@ use function React\Promise\resolve;
 class PipePool {
 
   const QUEUE_INTERVAL = 0.1;
+
+  /**
+   * @var int
+   * @readonly
+   */
+  public $id;
 
   /**
    * Keyed by ID
@@ -36,8 +44,15 @@ class PipePool {
    */
   private $timer;
 
-  public function __construct(Configuration $configuration) {
+  /**
+   * @var \Psr\Log\LoggerInterface
+   */
+  private $log;
+
+  public function __construct(Configuration $configuration, Logger $log) {
+    $this->id = IdUtil::next(__CLASS__);
     $this->configuration = $configuration;
+    $this->log = $log ? $log->withName('PipePool_' . $this->id) : new Logger('PipePool_' . $this->id);
   }
 
   /**
@@ -45,6 +60,7 @@ class PipePool {
    *   A promise which returns the online pool.
    */
   public function start(): PromiseInterface {
+    $this->log->info("Start");
     $this->timer = Loop::addPeriodicTimer(static::QUEUE_INTERVAL, FunctionUtil::singular([$this, 'checkQueue']));
     return resolve($this);
   }
@@ -56,6 +72,7 @@ class PipePool {
    *   A promise which returns when all subprocesses have stopped.
    */
   public function stop(float $timeout = 1.5): PromiseInterface {
+    $this->log->info("Stopping");
     Loop::cancelTimer($this->timer);
     $this->timer = NULL;
     $all = [];
@@ -77,6 +94,7 @@ class PipePool {
    *   A promise for the response data.
    */
   public function dispatch(string $context, string $requestLine): \React\Promise\PromiseInterface {
+    $this->log->debug("Enqueue ({context}): {requestLine}", ['context' => $context, 'requestLine' => $requestLine]);
     $todo = new Todo($context, $requestLine);
     $this->todos[] = $todo;
     return $todo->deferred->promise();
@@ -101,6 +119,7 @@ class PipePool {
           throw new \RuntimeException('Failed to dequeue expected task.');
         }
         array_shift($this->todos);
+        $this->log->debug("Executing", ['requestLine' => $todo->request]);
       };
 
       // Re-use existing/idle connection?
@@ -139,6 +158,7 @@ class PipePool {
    *   The number actually removed.
    */
   public function cleanupConnections(int $goalCount): int {
+    $this->log->debug("cleanupConnections");
     // Score all workers - and decide which ones we can remove.
 
     // Priority: remove crashed processes; then idle/exhausted processes; then idle/non-exhausted processes.
@@ -199,9 +219,10 @@ class PipePool {
    *   A promise for the new/started instance of PipeConnection.
    */
   private function addConnection(string $context): PromiseInterface {
-    $connection = new PipeConnection($this->configuration, $context);
+    $connection = new PipeConnection($this->configuration, $context, $this->log);
     $this->connections[$connection->id] = $connection;
     return $connection->start()->then(function($welcome) use ($connection) {
+      $this->log->debug('Started connection', ['welcome' => $welcome]);
       return $connection;
     });
   }
@@ -215,6 +236,7 @@ class PipePool {
     $connection = $this->connections[$connectionId];
     unset($this->connections[$connectionId]);
     return $connection->stop()->then(function() use ($connection) {
+      $this->log->debug('Stopped connection');
       return $connection;
     });
   }

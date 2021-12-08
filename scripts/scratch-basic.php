@@ -33,7 +33,11 @@ function main(string $salt = '') {
   $cfg->pipeCommand = 'bash ' . escapeshellarg(__DIR__ . '/dummy-inf.sh');
   // $cfg->pipeCommand = 'bash ' . escapeshellarg(__DIR__ . '/dummy-3.sh');
 
-  $pipe = new \Civi\Citges\PipeConnection($cfg);
+  $log = new \Monolog\Logger(basename(__FILE__));
+  $log->pushHandler(new \Monolog\Handler\StreamHandler(STDERR));
+  $log->pushProcessor(new \Monolog\Processor\PsrLogMessageProcessor());
+
+  $pipe = new \Civi\Citges\PipeConnection($cfg, NULL, $log);
   $pipe->start()->then(function($welcome) use ($pipe, $salt) {
     echo "0. Welcomed with \"$welcome\"\n";
     return $pipe->run("first $salt");

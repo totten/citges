@@ -2,11 +2,11 @@
 
 namespace Civi\Citges;
 
-use Civi\Citges\Util\ChattyTrait;
 use Civi\Citges\Util\IdUtil;
 use Civi\Citges\Util\LifetimeStatsTrait;
 use Civi\Citges\Util\LineReader;
 use Civi\Citges\Util\ProcessUtil;
+use Monolog\Logger;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 
@@ -21,7 +21,6 @@ use React\Promise\PromiseInterface;
  */
 class PipeConnection {
 
-  use ChattyTrait;
   use LifetimeStatsTrait;
 
   /**
@@ -61,11 +60,23 @@ class PipeConnection {
    */
   protected $deferred;
 
-  public function __construct(Configuration $configuration, ?string $context = NULL) {
+  /**
+   * @var \Psr\Log\LoggerInterface
+   */
+  protected $log;
+
+  public function __construct(Configuration $configuration, ?string $context = NULL, ?Logger $logger = NULL) {
     $this->id = IdUtil::next(__CLASS__);
     $this->context = $context;
     $this->configuration = $configuration;
     $this->deferred = NULL;
+
+    $this->log = $logger ? $logger->withName('PipeConnection_' . $this->id) : new Logger('PipeConnection_' . $this->id);
+    $this->log->pushProcessor(function($rec) {
+      $rec['childPid'] = $this->process ? $this->process->getPid() : '?';
+      $rec['parentPid'] = posix_getpid();
+      return $rec;
+    });
   }
 
   /**
@@ -76,7 +87,7 @@ class PipeConnection {
    *   It will report the welcome line.
    */
   public function start(): PromiseInterface {
-    $this->verbose("Starting: %s\n", $this->configuration->pipeCommand);
+    $this->log->info("Start: {cmd}", ['cmd' => $this->configuration->pipeCommand]);
     $this->startTime = microtime(TRUE);
 
     // We will receive a 1-line welcome which signals that startup has finished.
@@ -97,7 +108,7 @@ class PipeConnection {
       }
     });
 
-    $this->verbose("Forked\n");
+    $this->log->info("Forked");
     return $this->deferred->promise();
   }
 
@@ -119,12 +130,12 @@ class PipeConnection {
 
     if (!$this->process->isRunning()) {
       $this->releaseDeferred();
-      $this->verbose("Worker disappeared. Cannot send: $requestLine");
+      $this->log->error("Worker disappeared. Cannot send request", ['requestLine' => $requestLine]);
       $deferred->reject("Worker disappeared. Cannot send: $requestLine");
       return $deferred->promise();
     }
 
-    $this->verbose("Send %s\n", $requestLine);
+    $this->log->debug("Send request", ['requestLine' => $requestLine]);
     $this->process->stdin->write($requestLine . $this->delimiter);
     return $deferred->promise();
   }
@@ -147,10 +158,10 @@ class PipeConnection {
       throw new \RuntimeException("Process is already stopping or stopped.");
     }
     $this->setMoribund(TRUE);
-    $this->verbose("Stopping\n");
+    $this->log->info('Stopping');
     return ProcessUtil::terminateWithEscalation($this->process, $timeout)
       ->then(function($data) {
-        $this->verbose("Stopped\n");
+        $this->log->info('Stopped');
         return $data;
       });
   }
@@ -182,21 +193,20 @@ class PipeConnection {
       $this->releaseDeferred()->resolve($responseLine);
     }
     else {
-      $this->verbose("Received unexpected response line: %s\n", $responseLine);
+      $this->log->error('Received unexpected response line', ['responseLine' => $responseLine]);
     }
   }
 
   /**
-   * @param $data
+   * @param $responseLine
    * @internal
    */
-  public function onReceiveError($data): void {
-    if ($data === NULL || $data === '') {
-      // $this->verbose("[%s @ %d]: Ignore blank %s\n", static::CLASS, posix_getpid(), $data);
+  public function onReceiveError($responseLine): void {
+    if ($responseLine === NULL || $responseLine === '') {
       return;
     }
 
-    $this->verbose('STDERR: ' . $data);
+    $this->log->warning("STDERR: $responseLine");
   }
 
   /**
@@ -223,17 +233,6 @@ class PipeConnection {
     $oldDeferred = $this->deferred;
     $this->deferred = NULL;
     return $oldDeferred;
-  }
-
-  protected function verbose($msg, ...$args): void {
-    $msg = '[%.1f #%d %s #%d-%s] ' . $msg;
-    array_unshift($args,
-      microtime(TRUE),
-      posix_getpid(),
-      static::CLASS,
-      $this->id,
-      $this->process ? $this->process->getPid() : '?');
-    call_user_func('printf', $msg, ...$args);
   }
 
 }
