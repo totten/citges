@@ -53,7 +53,7 @@ class Application extends \Symfony\Component\Console\Application {
    */
   public function createCommands($context = 'default') {
     $commands = array();
-    // n$commands[] = new \Civi\Citges\Command\Fixmeommand();
+    $commands[] = new \Civi\Citges\Command\RunCommand();
     return $commands;
   }
 
