@@ -18,23 +18,22 @@ class AnotherTwoContextsTest extends PipePoolTestCase {
 
   protected function buildPromises(PipePool $pool): array {
     return [
-      $pool->dispatch('A', 'first'),
-      $pool->dispatch('A', 'second'),
-      $pool->dispatch('A', 'third'),
-      $pool->dispatch('B', 'fourth'),
-      $pool->dispatch('B', 'fifth'),
+      $pool->dispatch('A', 'first'), /* A-main */
+      $pool->dispatch('A', 'second'), /* A-alt */
+      $pool->dispatch('A', 'third'), /* A-main... or maybe A-alt... it's academic... */
+      $pool->dispatch('B', 'fourth'), /* B-main */
     ];
   }
 
   protected function checkResults(array $results): void {
-    $this->assertCount(5, $results);
+    $this->assertCount(4, $results);
 
     $resultValues = preg_replace(';processed request #(\d+) \((.*)\);', '\2', $results);
-    $this->assertEquals(['first', 'second', 'third', 'fourth', 'fifth'], $resultValues);
+    $this->assertEquals(['first', 'second', 'third', 'fourth'], $resultValues);
 
     $requestIds = preg_replace(';processed request #(\d+) \((.*)\);', '\1', $results);
     $this->assertDistributionPattern([
-      [/*A*/ '1', '2', /*A'*/ '1', /*B*/ '1', '2'],
+      [/*A-main*/ '1', '2', /*A-alt*/ '1', /*B-main*/ '1'],
     ], $requestIds);
   }
 

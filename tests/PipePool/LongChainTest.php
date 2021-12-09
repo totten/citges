@@ -5,16 +5,20 @@ namespace Civi\Citges\PipePool;
 use Civi\Citges\PipePool;
 
 /**
+ * 5 tasks across 1 context with a limit of 4 concurrent workers.
+ *
+ * We never use the full limit of 4 concurrent workers because the tasks are organized
+ * as a linear chain - so we only need 1 worker at a time.
+ *
+ * In theory, 1 worker could handle all 5 requests. However, due to maxRequests=3,
+ * the first worker will be replaced after 3 requests.
  */
 class LongChainTest extends PipePoolTestCase {
 
   protected function buildConfig(): array {
     return [
       'maxWorkers' => 4,
-      // Note: Our quota allows multiple concurrent workers, but our chaining means that we never
-      // have concurrent requests. In reality, we only use 1 worker at a time.
       'maxRequests' => 3,
-      // Note: We will hit the maxRequests limit. It will force us to replace the worker.
       'pipeCommand' => $this->getPath('scripts/dummy-inf.sh'),
     ];
   }

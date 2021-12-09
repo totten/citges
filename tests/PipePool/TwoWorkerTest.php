@@ -5,7 +5,12 @@ namespace Civi\Citges\PipePool;
 use Civi\Citges\PipePool;
 
 /**
- * Create two workers and execute several tasks with each.
+ * Two workers handle 7 tasks from the same context.
+ *
+ * Because all tasks have the same context, we are free to split tasks between them.
+ * This is slightly non-deterministic (depending on which workers happen to go faster).
+ * Ideally, one worker handles 4 tasks, and the other handles 3 tasks - but this
+ * could fluctuate (4+3=7; 5+2=7; 6+1=7).
  */
 class TwoWorkerTest extends PipePoolTestCase {
 
@@ -24,19 +29,24 @@ class TwoWorkerTest extends PipePoolTestCase {
       $pool->dispatch('A', 'third'),
       $pool->dispatch('A', 'fourth'),
       $pool->dispatch('A', 'fifth'),
+      $pool->dispatch('A', 'sixth'),
+      $pool->dispatch('A', 'seventh'),
     ];
   }
 
   protected function checkResults(array $results): void {
-    $this->assertCount(5, $results);
+    $this->assertCount(7, $results);
 
     $resultValues = preg_replace(';processed request #(\d+) \((.*)\);', '\2', $results);
-    $this->assertEquals(['first', 'second', 'third', 'fourth', 'fifth'], $resultValues);
+    $this->assertEquals(['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh'], $resultValues);
 
     $requestIds = preg_replace(';processed request #(\d+) \((.*)\);', '\1', $results);
     $this->assertDistributionPattern([
-      ['1', '2', '3', '1', '2'],
-      ['1', '2', '3', '4', '1'],
+      // We know that both workers W1 and W2 will handle 1+ tasks. We'd expect an even split given
+      // consistent load and comparable tasks - but the exact split could vary.
+      [/*W1*/ '1', '2', '3', '4', /*W2*/ '1', '2', '3'],
+      [/*W1*/ '1', '2', '3', '4', '5', /*W2*/ '1', '2'],
+      [/*W1*/ '1', '2', '3', '4', '5', '6', /*W2*/ '1'],
     ], $requestIds);
   }
 

@@ -5,6 +5,12 @@ namespace Civi\Citges\PipePool;
 use Civi\Citges\PipePool;
 
 /**
+ * 5 tasks across 2 contexts (A-B; 2-3 tasks each) and a limit of 4 workers.
+ *
+ * We never use the full limit of 4 workers because the tasks are
+ * organized as linear chains, ie
+ *   - The chain A100=>A200=>A300 can be entirely serviced by one (A) worker.
+ *   - The chain B100=>B200 can be entirely serviced by one (B) worker.
  */
 class SomeChainsTest extends PipePoolTestCase {
 
