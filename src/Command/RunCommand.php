@@ -9,13 +9,15 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class RunCommand extends Command {
 
+  use ConfigurationTrait;
+
   protected function configure() {
     $this
       ->setName('run')
       ->setDescription('Monitor queue for tasks and execute them.')
       ->addOption('channel', NULL, InputOption::VALUE_REQUIRED, 'Preferred communication channel (web,pipe). May give multiple for hybrid communication.')
-      ->addOption('web', NULL, InputOption::VALUE_REQUIRED, 'Poll queue via web URL (HTTP base URL)')
-      ->addOption('pipe', NULL, InputOption::VALUE_REQUIRED, 'Poll queue via pipe (launcher command)')
+      ->addOption('web', NULL, InputOption::VALUE_REQUIRED, 'Connect via web URL (HTTP base URL)')
+      ->addOption('pipe', NULL, InputOption::VALUE_REQUIRED, 'Connect via pipe (launcher command)')
       ->setHelp(
         "Monitor queue for tasks and execute them.\n" .
         "\n" .
@@ -35,13 +37,25 @@ class RunCommand extends Command {
         //  "    --pipe='ssh worker@example.com cv ev \"Civi::pipe();\"'\n" .
         "\n"
       );
+    $this->configureCommonOptions();
     parent::configure();
   }
 
+  protected function initialize(InputInterface $input, OutputInterface $output) {
+    parent::initialize($input, $output);
+    if (empty($input->getOption('pipe')) && empty($input->getOption('web'))) {
+      $input->setOption('pipe', 'cv ev "Civi::pipe();"');
+    }
+  }
+
   protected function execute(InputInterface $input, OutputInterface $output) {
+    $config = $this->createConfiguration($input, $output);
+    $log = $this->createLogger($input, $output, $config);
     [$ctlChannel, $workChannel] = $this->pickChannels($input, $output);
-    // nm - If $ctlChannel or $workChannel is pipe, then open pipe
-    $output->writeln("ctl=$ctlChannel work=$workChannel");
+    $log->info('Setup channels (control={ctl}, work={work})', [
+      'ctl' => $ctlChannel,
+      'work' => $workChannel,
+    ]);
   }
 
   protected function pickChannels(InputInterface $input, OutputInterface $output): array {
@@ -68,7 +82,7 @@ class RunCommand extends Command {
         return ['web', 'pipe'];
 
       default:
-        throw new \RuntimeException("Multiple channels have been defined. Please set --channel=... with a valid option.");
+        throw new \RuntimeException("Please set --channel options");
     }
   }
 

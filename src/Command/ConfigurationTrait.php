@@ -5,6 +5,7 @@ namespace Civi\Citges\Command;
 use Civi\Citges\Configuration;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
+use Monolog\Handler\AbstractProcessingHandler;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Symfony\Component\Console\Input\InputInterface;
@@ -63,7 +64,24 @@ trait ConfigurationTrait {
     }
 
     if ($output->isVerbose() || !$config->logFile) {
-      $consoleHandler = new StreamHandler(STDERR, $config->logLevel);
+      $consoleHandler = new class($output, $config->logLevel) extends AbstractProcessingHandler {
+
+        /**
+         * @var \Symfony\Component\Console\Output\OutputInterface
+         */
+        protected $output;
+
+        public function __construct(OutputInterface $output, $level = Logger::DEBUG, bool $bubble = TRUE) {
+          parent::__construct($level, $bubble);
+          $this->output = $output;
+        }
+
+        protected function write(array $record): void {
+          $this->output->writeln($record['formatted']);
+        }
+
+      };
+      // $consoleHandler = new StreamHandler(STDERR, $config->logLevel);
       $consoleHandler->setFormatter($formatter);
       $log->pushHandler($consoleHandler);
     }
