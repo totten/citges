@@ -198,7 +198,7 @@ class PipePool {
       if ($removedCount >= $goalCount) {
         break;
       }
-      $this->log->debug('cleanupConnections: remove {conn}', ['conn' => $connection->toString]);
+      $this->log->debug('cleanupConnections: remove {conn}', ['conn' => $connection->toString()]);
       $this->removeConnection($connection->id);
       $removedCount++;
     }

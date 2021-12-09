@@ -63,12 +63,28 @@ abstract class PipePoolTestCase extends TestCase {
     $log->pushProcessor(new PsrLogMessageProcessor());
     $log->pushHandler($this->log);
 
-    $id = preg_replace(';[^\w];', '_', $this->getName(TRUE));
+    $class = explode('\\', static::CLASS);
+    $id = array_pop($class);
     $logFile = FileUtil::put($this->getPath('tmp/' . $id . '.txt'), '');
     $log->pushHandler(new StreamHandler($logFile));
 
     $pool = new PipePool($cfg, $log);
     return $pool;
+  }
+
+  protected function assertDistributionPattern($validOptions, $actual) {
+    sort($actual);
+    $match = FALSE;
+    foreach ($validOptions as $validOption) {
+      sort($validOption);
+      if ($validOption === $actual) {
+        $match = TRUE;
+        break;
+      }
+    }
+    $this->assertTrue($match,
+      "List should match an valid distribution pattern. (Actual pattern: " . implode(',', $actual) . ")"
+    );
   }
 
 }
