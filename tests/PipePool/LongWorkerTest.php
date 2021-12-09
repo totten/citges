@@ -27,9 +27,9 @@ class LongWorkerTest extends PipePoolTestCase {
 
   protected function checkResults(array $results): void {
     $this->assertEquals([
-      "dummy-inf: processed request #1 (first)",
-      "dummy-inf: processed request #2 (second)",
-      "dummy-inf: processed request #3 (third)",
+      "processed request #1 (first)",
+      "processed request #2 (second)",
+      "processed request #3 (third)",
     ], $results);
   }
 

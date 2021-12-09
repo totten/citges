@@ -27,9 +27,9 @@ class ShortWorkerTest extends PipePoolTestCase {
 
   protected function checkResults(array $results): void {
     $this->assertEquals([
-      "dummy-inf: processed request #1 (first)",
-      "dummy-inf: processed request #1 (second)",
-      "dummy-inf: processed request #1 (third)",
+      "processed request #1 (first)",
+      "processed request #1 (second)",
+      "processed request #1 (third)",
     ], $results);
   }
 
