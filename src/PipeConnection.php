@@ -235,4 +235,8 @@ class PipeConnection {
     return $oldDeferred;
   }
 
+  public function toString() {
+    return sprintf('PipeConnection(%s,%s)', $this->id, $this->context);
+  }
+
 }
