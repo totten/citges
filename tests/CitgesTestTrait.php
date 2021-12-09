@@ -1,6 +1,7 @@
 <?php
 namespace Civi\Citges;
 
+use React\Promise\PromiseInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 
 trait CitgesTestTrait {
@@ -24,6 +25,15 @@ trait CitgesTestTrait {
     $commandTester = new CommandTester($command);
     $commandTester->execute($args);
     return $commandTester;
+  }
+
+  public function getPath(?string $relFile = NULL): string {
+    $dir = dirname(__DIR__);
+    return $relFile ? "$dir/$relFile" : $dir;
+  }
+
+  protected function await(PromiseInterface $promise) {
+    return \Clue\React\Block\await($promise, NULL, 120);
   }
 
 }

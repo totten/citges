@@ -7,7 +7,7 @@ i=0
 while true ; do
   if read LINE; then
     ((i=i+1))
-    echo "$SELF: processed $i ($LINE)"
+    echo "$SELF: processed request #$i ($LINE)"
   else
     exit
   fi
