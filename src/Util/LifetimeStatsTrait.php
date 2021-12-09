@@ -65,7 +65,7 @@ trait LifetimeStatsTrait {
     if ($this->requestCount > $configuration->maxRequests) {
       return TRUE;
     }
-    if ($this->startTime + $configuration->maxDuration > microtime(TRUE)) {
+    if ($this->startTime + $configuration->maxDuration < microtime(TRUE)) {
       return TRUE;
     }
     return FALSE;
