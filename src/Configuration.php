@@ -56,4 +56,14 @@ class Configuration {
    */
   public $logFormat;
 
+  public function __construct(array $values = []) {
+    foreach ($values as $field => $value) {
+      $this->{$field} = $value;
+    }
+  }
+
+  public function __set($name, $value) {
+    throw new \RuntimeException(sprintf('Unrecognized property: %s::$%s', __CLASS__, $name));
+  }
+
 }
