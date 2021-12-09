@@ -158,7 +158,6 @@ class PipePool {
    *   The number actually removed.
    */
   public function cleanupConnections(int $goalCount): int {
-    $this->log->debug("cleanupConnections");
     // Score all workers - and decide which ones we can remove.
 
     // Priority: remove crashed processes; then idle/exhausted processes; then idle/non-exhausted processes.
@@ -187,6 +186,7 @@ class PipePool {
     foreach ($this->connections as $connection) {
       /** @var \Civi\Citges\PipeConnection $connection */
       $score = $getScore($connection);
+      $this->log->debug('cleanupConnections: scored {conn} as {score}', ['conn' => $connection->toString(), 'score' => $score]);
       if ($score > 0) {
         $sorted->insert($connection, $score);
       }
@@ -198,9 +198,11 @@ class PipePool {
       if ($removedCount >= $goalCount) {
         break;
       }
+      $this->log->debug('cleanupConnections: remove {conn}', ['conn' => $connection->toString]);
       $this->removeConnection($connection->id);
       $removedCount++;
     }
+    $this->log->debug('cleanupConnections: removed {count} connection(s)', ['count' => $removedCount]);
     return $removedCount;
   }
 
