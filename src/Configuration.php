@@ -35,4 +35,25 @@ class Configuration {
    */
   public $pipeCommand;
 
+  /**
+   * @var string
+   */
+  public $logFile;
+
+  /**
+   * Level of information to write to log file.
+   *
+   * One of: debug|info|notice|warning|error|critical|alert|emergency
+   *
+   * @var string
+   */
+  public $logLevel;
+
+  /**
+   * One of: text|json
+   *
+   * @var string
+   */
+  public $logFormat;
+
 }
