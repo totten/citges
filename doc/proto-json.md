@@ -2,18 +2,23 @@
 
 ## General terms
 
-The Civi::pipe protocol is a synchronous request-response mechanism with line-oriented messaging and JSON formatting.
+The Civi::pipe protocol provides a request-response mechanism with line-oriented messaging and JSON formatting.
 Specifically,
 
-1. A client opens a connection to Civi::pipe
-2. The server responds with a header (JSON, UTF8, one-line).
-3. The client submits a request (JSON, UTF8, one line).
-4. The server sends a response (JSON, UTF8, one line).
+1. A client opens a connection to `Civi::pipe()`
+2. The server responds with a header (UTF-8, one-line, JSON).
+3. The client submits a request (UTF-8, one-line, JSON).
+4. The server sends a response (UTF-8, one-line, JSON.
 5. Go back to (3).
 
-The pipe protocol is specifically focused on two-channel communication (`STDIN`/`STDOUT`).  If there is a third channel
-(`STDERR`), then the client MAY log or display it for debugging purposes.  However, `STDERR` must be ignored when
-parsing requests and responses.
+The protocol is synchronous with a single thread of operation (*one request then one response*).  This parallels the PHP-HTTP
+architecture ordinarily used by CiviCRM (*one process handles one request at a time*).  However, it expands the lifespan of
+the PHP process to serve multiple requests.  This avoids redundant bootstraps, but it is only suitable for a series of
+requests with a common context (*eg several requests by the same user*).
+
+The pipe protocol is specifically focused on two-channel communication (`STDIN`/`STDOUT`).  If there is a third (`STDERR`)
+channel, then the client MAY log or display it for debugging purposes.  However, `STDERR` must be ignored when parsing
+requests and responses.
 
 ## Example
 
@@ -75,21 +80,9 @@ Examples:
 ```
 
 Many PHP deployments include misconfigurations, bugs, or add-ons -- which can cause extra noise to be presented on STDOUT.
-
-Clients SHOULD use the [CTRL option `responsePrefix`](#CTRL) to distinguish noise.
+Clients SHOULD use the [option `responsePrefix`](#OPTIONS) to distinguish noise.
 
 ## Request types
-
-### `ECHO`: Test message
-
-The `ECHO` message is used for testing. It simply returns the input.
-
-```
-> {"ECHO":1}
-< {"OK":1}
-> {"ECHO":[1,2,3]}
-< {"OK":[1,2,3]}
-```
 
 ### `API3`: Invoke APIv3
 
@@ -129,14 +122,43 @@ responses are `OK`. However, the response-value may include APIv4-specific error
 
 By default, APIv4 requests received on `Civi::pipe()` will enforce permission-checks, but you may opt-out via `"checkPermissions":false`.
 
-### `CTRL`: Control
+### `ECHO`: Test message
 
-The control (`CTRL`) message is used to investigate or manipulate the connection.
+The `ECHO` message is used for testing. It simply returns the input.
 
 ```
-> {"CTRL":["get"]}
+> {"ECHO":1}
+< {"OK":1}
+> {"ECHO":[1,2,3]}
+< {"OK":[1,2,3]}
+```
+
+### `LOGIN`: Set active user
+
+Set the active user/contact.
+
+```
+> {"LOGIN":{"contactId":202}}
+< {"OK":{"contactId":202,"userId":1}}
+```
+
+Note: Only trusted parties are allowed to connect over the pipe medium. The `login` method
+sets the active user but does not authenticate credentials.
+
+The login principal may be specified with any one of the following:
+
+* `contactId` (`int`)
+* `userId` (`int`)
+* `user` (`string`)
+
+### `OPTIONS`: Get/set session options
+
+The control (`OPTIONS`) message is used to investigate or manipulate the connection.
+
+```
+> {"OPTIONS":[]}
 < {"OK":{"responsePrefix":null,"maxLine":16384}}
-> {"CTRL":["set",{"responsePrefix":"\u0001\u0001"}]}
+> {"OPTIONS":{"responsePrefix":"\u0001\u0001"}}
 < {"OK":true}
 ```
 
