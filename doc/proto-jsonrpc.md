@@ -118,14 +118,29 @@ The login principal may be specified with any one of the following:
 
 ### `options`
 
-The `options` method is used to investigate or manipulate connectivity options.
+The `options` method manages connectivity options. By default, it will return a list of all known options:
 
 ```
-> {"OPTIONS":{}}
-< {"OK":{"responsePrefix":null,"maxLine":16384}}
-> {"OPTIONS":{"responsePrefix":"\u0001\u0001"}}
-< {"OK":true}
+> {"jsonrpc":"2.0","method":"options","id":null}
+< {"jsonrpc":"2.0","result":{"responsePrefix":null,"maxLine":524288},"id":null}
 ```
+
+Alternatively, you may use it to update an existing option. Any modified options will be returned.
+
+```
+> {"jsonrpc":"2.0","method":"options","params":{"responsePrefix":"\u0001\u0001"},"id":null}
+< {"jsonrpc":"2.0","result":{"responsePrefix":"\u0001\u0001"},"id":null}
+```
+
+The following options are defined:
+
+* `maxLine` (`int`): The maximum length of a line in the control session, measured in bytes.
+  This determines the maximum request size. (The default value is deployment-specific/implementation-specific.
+  The default must be at least 64kb. At time of writing, the default for civicrm-core is 512kb.)
+* `responsePrefix` (`string`): Before sending any response (but after evaluating the request), send
+  an extra prefix or delimiter. (Defensively-coded clients may set a prefix and watch for it. If any
+  output comes before the prefix, then the client may infer that the server is misbehaved - eg a debug
+  hack or a bad plugin is creating interference. Disregard output before the prefix.)
 
 ## Special cases
 
