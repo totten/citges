@@ -11,13 +11,13 @@ Specifically,
 4. The server sends a response (UTF-8, one-line, JSON-RPC).
 5. Go back to (3).
 
-The protocol is synchronous with a single thread of operation (*one request then one response*).  This parallels the PHP-HTTP
-architecture ordinarily used by CiviCRM (*one process handles one request at a time*).  However, it expands the lifespan of
-the PHP process to serve multiple requests.  This avoids redundant bootstraps, but it is only suitable for a series of
+The protocol is synchronous with a single thread of operation (*one request then one response*). This parallels the PHP-HTTP
+architecture ordinarily used by CiviCRM (*one process handles one request at a time*). However, it expands the lifespan of
+the PHP process to serve multiple requests. This avoids redundant bootstraps, but it is only suitable for a series of
 requests with a common context (*eg several requests by the same user*).
 
-The pipe protocol is specifically focused on two-channel communication (`STDIN`/`STDOUT`).  If there is a third (`STDERR`)
-channel, then the client MAY log or display it for debugging purposes.  However, `STDERR` must be ignored when parsing
+The pipe protocol is specifically focused on two-channel communication (`STDIN`/`STDOUT`). If there is a third (`STDERR`)
+channel, then the client MAY log or display it for debugging purposes. However, `STDERR` must be ignored when parsing
 requests and responses.
 
 ## Example
@@ -26,10 +26,10 @@ requests and responses.
 $ cd /var/www/example.com/web
 $ cv ev 'Civi::pipe();'
 < {"Civi::pipe":["jsonrpc20"]}
-> {"jsonrpc":"2.0","method":"echo","params":"hello world","id":null}
-< {"jsonrpc":"2.0","result":"hello world","id":null}
 > {"jsonrpc":"2.0","method":"echo","params":[1,2,3],"id":null}
 < {"jsonrpc":"2.0","result":[1,2,3],"id":null}
+> {"jsonrpc":"2.0","method":"echo","params":"hello world","id":null}
+< {"jsonrpc":"2.0","result":"hello world","id":null}
 ```
 
 ## Formatting
@@ -43,7 +43,7 @@ JSON is rendered in condensed / ugly / non-"pretty-printed" format. JSON MUST NO
 Each request-line and each response-line is formatted according to [JSON-RPC v2.0](https://www.jsonrpc.org/specification).
 
 Many PHP deployments include misconfigurations, bugs, or add-ons -- which can cause extra noise to be presented on STDOUT.
-Clients SHOULD use the [session option `responsePrefix`](#CTRL) to distinguish noise.
+Clients SHOULD use the [session option `responsePrefix`](#options) to detect and discard noise.
 
 ## Methods
 
