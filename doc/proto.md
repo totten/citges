@@ -25,11 +25,11 @@ requests and responses.
 ```
 $ cd /var/www/example.com/web
 $ cv ev 'Civi::pipe();'
-< {"Civi::pipe":["jsonrpc20"]}
+< {"Civi::pipe":{"v":"5.46.0","t":"trusted","l":"login"}}
+> {"jsonrpc":"2.0","method":"echo","params":["hello world"],"id":null}
+< {"jsonrpc":"2.0","result":["hello world"],"id":null}
 > {"jsonrpc":"2.0","method":"echo","params":[1,2,3],"id":null}
 < {"jsonrpc":"2.0","result":[1,2,3],"id":null}
-> {"jsonrpc":"2.0","method":"echo","params":"hello world","id":null}
-< {"jsonrpc":"2.0","result":"hello world","id":null}
 ```
 
 ## Formatting
@@ -44,6 +44,34 @@ Each request-line and each response-line is formatted according to [JSON-RPC v2.
 
 Many PHP deployments include misconfigurations, bugs, or add-ons -- which can cause extra noise to be presented on STDOUT.
 Clients SHOULD use the [session option `responsePrefix`](#options) to detect and discard noise.
+
+## Header negotiation
+
+The `Civi::pipe()` method supports negotiation-flags for a few common connection options. The result of
+setting these flags is reflected in the header line.
+
+For example, `Civi::pipe("vtl")` requests three flags (`v`, `t`, `l`). Each flag will be listed in the header, eg
+
+```js
+{"Civi::pipe":{"v":"5.48.0","t":"trusted","l":["login"]}
+```
+
+Valid flags are:
+
+* `v` (*version*): Report the CiviCRM version. Ex: `"v":"5.48.0"`
+* `j` (*json-rpc*): Report supported flavors of JSON-RPC. Ex: `"j":["jsonrpc-2.0"]`
+* `l` (*login*): Report login options. Ex: `"l":["login"]` and `"l":["nologin"]`
+* `t` (*trusted*): Mark session as trusted. Logins do not require credentials. API calls may execute with or without permission-checks.
+* `u` (*untrusted*): Mark session as untrusted. Logins require credentials. API calls may only execute with permission-checks.
+
+Unrecognized flags must not cause a failure. They must report as `null`. In this example, `x` is an unrecognized flag:
+
+```php
+Civi::pipe("uxv");
+```
+```javascript
+{"Civi::pipe":{"u":"untrusted","x":null,"v":"5.48.0"}
+```
 
 ## Methods
 
@@ -92,8 +120,8 @@ By default, APIv4 requests received on `Civi::pipe()` will enforce permission-ch
 The `echo` message is used for testing. It simply returns the input.
 
 ```
-> {"jsonrpc":"2.0","method":"echo","params":"hello world","id":null}
-< {"jsonrpc":"2.0","result":"hello world","id":null}
+> {"jsonrpc":"2.0","method":"echo","params":["hello world"],"id":null}
+< {"jsonrpc":"2.0","result":["hello world"],"id":null}
 > {"jsonrpc":"2.0","method":"echo","params":[1,2,3],"id":null}
 < {"jsonrpc":"2.0","result":[1,2,3],"id":null}
 ```
@@ -122,7 +150,7 @@ The `options` method manages connectivity options. By default, it will return a 
 
 ```
 > {"jsonrpc":"2.0","method":"options","id":null}
-< {"jsonrpc":"2.0","result":{"responsePrefix":null,"maxLine":524288},"id":null}
+< {"jsonrpc":"2.0","result":{"responsePrefix":null,"bufferSize":524288},"id":null}
 ```
 
 Alternatively, you may use it to update an existing option. Any modified options will be returned.
@@ -134,7 +162,10 @@ Alternatively, you may use it to update an existing option. Any modified options
 
 The following options are defined:
 
-* `maxLine` (`int`): The maximum length of a line in the control session, measured in bytes.
+* `apiError` (`string`): Specify how CiviCRM APIs should report their errors. Either:
+    * `array`: Errors are reported in their canonical array format. Useful for precise+generic handling.
+    * `exception`: Errors are converted to exceptions and then to JSON-RPC errors. Improves out-of-the-box DX on stricter JSON-RPC clients.
+* `bufferSize` (`int`): The maximum length of a line in the control session, measured in bytes.
   This determines the maximum request size. (The default value is deployment-specific/implementation-specific.
   The default must be at least 64kb. At time of writing, the default for civicrm-core is 512kb.)
 * `responsePrefix` (`string`): Before sending any response (but after evaluating the request), send
