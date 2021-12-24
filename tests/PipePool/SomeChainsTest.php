@@ -11,6 +11,7 @@ use Civi\Citges\PipePool;
  * organized as linear chains, ie
  *   - The chain A100=>A200=>A300 can be entirely serviced by one (A) worker.
  *   - The chain B100=>B200 can be entirely serviced by one (B) worker.
+ * @group unit
  */
 class SomeChainsTest extends PipePoolTestCase {
 

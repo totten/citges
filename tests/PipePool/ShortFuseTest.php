@@ -6,6 +6,7 @@ use Civi\Citges\PipePool;
 
 /**
  * Create workers who can only handle 2 jobs each.
+ * @group unit
  */
 class ShortFuseTest extends PipePoolTestCase {
 

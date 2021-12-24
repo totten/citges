@@ -9,6 +9,8 @@ use Civi\Citges\PipePool;
  *
  * The worker can service multiple requests for the same context without resetting.
  * However, whenever a request comes for a new context, we must reset the worker.
+ *
+ * @group unit
  */
 class TwoContextsTest extends PipePoolTestCase {
 

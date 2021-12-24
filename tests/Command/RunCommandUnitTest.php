@@ -6,9 +6,9 @@ use Civi\Citges\CitgesTestTrait;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @group e2e
+ * @group unit
  */
-class RunCommandTest extends TestCase {
+class RunCommandUnitTest extends TestCase {
 
   use CitgesTestTrait;
 

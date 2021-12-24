@@ -8,6 +8,8 @@ use Civi\Citges\PipePool;
  * 8 tasks across 5 contexts (A-E; 1-2 tasks per context). Limit of 5 concurrent workers.
  *
  * In this usage pattern, we effectively spin-up 1 worker for each context.
+ *
+ * @group unit
  */
 class ManyContextsTest extends PipePoolTestCase {
 

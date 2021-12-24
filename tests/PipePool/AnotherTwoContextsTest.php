@@ -5,6 +5,7 @@ namespace Civi\Citges\PipePool;
 use Civi\Citges\PipePool;
 
 /**
+ * @group unit
  */
 class AnotherTwoContextsTest extends PipePoolTestCase {
 

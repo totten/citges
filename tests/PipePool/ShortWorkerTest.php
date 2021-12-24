@@ -6,6 +6,7 @@ use Civi\Citges\PipePool;
 
 /**
  * Create several workers. Each runs only a single task.
+ * @group unit
  */
 class ShortWorkerTest extends PipePoolTestCase {
 

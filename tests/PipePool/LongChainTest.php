@@ -12,6 +12,8 @@ use Civi\Citges\PipePool;
  *
  * In theory, 1 worker could handle all 5 requests. However, due to maxRequests=3,
  * the first worker will be replaced after 3 requests.
+ *
+ * @group unit
  */
 class LongChainTest extends PipePoolTestCase {
 

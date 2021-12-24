@@ -11,6 +11,8 @@ use Civi\Citges\PipePool;
  * This is slightly non-deterministic (depending on which workers happen to go faster).
  * Ideally, one worker handles 4 tasks, and the other handles 3 tasks - but this
  * could fluctuate (4+3=7; 5+2=7; 6+1=7).
+ *
+ * @group unit
  */
 class TwoWorkerTest extends PipePoolTestCase {
 
