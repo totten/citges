@@ -114,3 +114,29 @@ citges run --channel=pipe,web \
   --pipe='ssh webuser@backend.example.com cv ev --cwd=/var/www/example.com/web ev "Civi::pipe();"' \
   --web='https://user:pass@example.com/civicrm/queue'
 ```
+
+## Tests
+
+Tests are organized into two groups:
+
+* `@group unit`: Basic tests that run without much environmental setup/support
+* `@group e2e`: End-to-end tests that require a working Civi instances
+
+Running the `unit` tests is straightforward:
+
+```bash
+phpunit8 --group unit
+```
+
+To run the E2E tests, you need to have a working Civi environment - and pick
+an appropriate `Civi::pipe()` command.
+
+```bash
+CITGES_DEFAULT_PIPE='cv --cwd=/path/to/civicrm ev \'Civi::pipe();\'' phpunit8 --group e2e
+```
+
+The command `scripts/run-tests.sh <civicrm-root>` will run both/all suites.
+
+```bash
+./scripts/run-tests.sh ~/bknix/build/dmaster/web
+```
