@@ -132,11 +132,11 @@ To run the E2E tests, you need to have a working Civi environment - and pick
 an appropriate `Civi::pipe()` command.
 
 ```bash
-CITGES_DEFAULT_PIPE='cv --cwd=/path/to/civicrm ev \'Civi::pipe();\'' phpunit8 --group e2e
+CV_TEST_BUILD='/path/to/site/root' phpunit8 --group e2e
 ```
 
-The command `scripts/run-tests.sh <civicrm-root>` will run both/all suites.
+Or run all of them:
 
 ```bash
-./scripts/run-tests.sh ~/bknix/build/dmaster/web
+CV_TEST_BUILD='/path/to/site/root' phpunit8 --debug
 ```
