@@ -19,6 +19,7 @@
     },
     "require": {
         "php": "~7.2 || ~8.0",
+        "ext-json": "*",
         "civicrm/composer-downloads-plugin": "~2.1|^3",
         "react/http": "^1.5",
         "react/child-process": "^0.6.4",

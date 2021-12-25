@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "951a0599d1054e50e31428ed0c765e88",
+    "content-hash": "30b74da5a61cd962897d06690ba5c795",
     "packages": [
         {
             "name": "civicrm/composer-downloads-plugin",
@@ -112,6 +112,10 @@
                 "sleep",
                 "synchronous"
             ],
+            "support": {
+                "issues": "https://github.com/clue/reactphp-block/issues",
+                "source": "https://github.com/clue/reactphp-block/tree/v1.5.0"
+            },
             "funding": [
                 {
                     "url": "https://clue.engineering/support",
@@ -254,6 +258,10 @@
                 "logging",
                 "psr-3"
             ],
+            "support": {
+                "issues": "https://github.com/Seldaek/monolog/issues",
+                "source": "https://github.com/Seldaek/monolog/tree/2.3.5"
+            },
             "funding": [
                 {
                     "url": "https://github.com/Seldaek",
@@ -412,6 +420,9 @@
                 "psr",
                 "psr-3"
             ],
+            "support": {
+                "source": "https://github.com/php-fig/log/tree/1.1.4"
+            },
             "time": "2021-05-03T11:20:27+00:00"
         },
         {
@@ -1723,11 +1734,12 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "~7.2 || ~8.0"
+        "php": "~7.2 || ~8.0",
+        "ext-json": "*"
     },
     "platform-dev": [],
     "platform-overrides": {
         "php": "7.2"
     },
-    "plugin-api-version": "1.1.0"
+    "plugin-api-version": "2.1.0"
 }
