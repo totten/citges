@@ -2,14 +2,26 @@
 
 namespace Civi\Citges\Command;
 
+use Civi\Citges\CiviPipeConnection;
+use Civi\Citges\CiviQueueWatcher;
+use Civi\Citges\PipeConnection;
+use Civi\Citges\PipePool;
+use Civi\Citges\Util\PromiseUtil;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use function Clue\React\Block\await;
+use function React\Promise\reject;
 
 class RunCommand extends Command {
 
   use ConfigurationTrait;
+
+  /**
+   * @var \Monolog\Logger
+   */
+  private $logger;
 
   protected function configure() {
     $this
@@ -17,7 +29,6 @@ class RunCommand extends Command {
       ->setDescription('Monitor queue for tasks and execute them.')
       ->addOption('channel', NULL, InputOption::VALUE_REQUIRED, 'Preferred communication channel (web,pipe). May give multiple for hybrid communication.')
       ->addOption('web', NULL, InputOption::VALUE_REQUIRED, 'Connect via web URL (HTTP base URL)')
-      ->addOption('pipe', NULL, InputOption::VALUE_REQUIRED, 'Connect via pipe (launcher command)')
       ->setHelp(
         "Monitor queue for tasks and execute them.\n" .
         "\n" .
@@ -50,12 +61,39 @@ class RunCommand extends Command {
 
   protected function execute(InputInterface $input, OutputInterface $output) {
     $config = $this->createConfiguration($input, $output);
-    $log = $this->createLogger($input, $output, $config);
-    [$ctlChannel, $workChannel] = $this->pickChannels($input, $output);
-    $log->info('Setup channels (control={ctl}, work={work})', [
-      'ctl' => $ctlChannel,
-      'work' => $workChannel,
-    ]);
+    $this->logger = $this->createLogger($input, $output, $config);
+    // [$ctlChannel, $workChannel] = $this->pickChannels($input, $output);
+    // $this->logger->info('Setup channels (control={ctl}, work={work})', [
+    //   'ctl' => $ctlChannel,
+    //   'work' => $workChannel,
+    // ]);
+
+    $ctl = new CiviPipeConnection(new PipeConnection($config, 'ctl'), $this->logger->withName('CtlConn'));
+    $work = new PipePool($config, $this->logger->withName('WorkPool'));
+
+    await($ctl->start()
+      ->then(...PromiseUtil::dump())
+      ->then(function (array $welcome) use ($ctl) {
+        if (($welcome['t'] ?? NULL) === 'trusted') {
+          // OK, we can execute Queue APIs.
+          return $ctl->options(['apiCheckPermissions' => FALSE]);
+        }
+        else {
+          reject(new \Exception("citges requires trusted connection"));
+          // Alternatively, if $header['l']==='login' and you have login-credentials,
+          // then perform a login.
+        }
+      })
+      ->then(...PromiseUtil::dump())
+      ->then(function () use ($ctl, $config, $work) {
+        // return $ctl->api4('Queue', 'get', [
+        //   'where' => [['is_autorun', '=', TRUE]],
+        // ]);
+        $watcher = new CiviQueueWatcher($config, $ctl, $work, $this->logger->withName('CiviQueueWatcher'));
+        return $watcher->start();
+      })
+      ->then(...PromiseUtil::dump())
+    );
   }
 
   protected function pickChannels(InputInterface $input, OutputInterface $output): array {

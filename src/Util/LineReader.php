@@ -45,6 +45,7 @@ class LineReader extends EventEmitter implements ReadableStreamInterface {
 
     $buf = '';
     $reader->on('data', function ($newData) use (&$buf) {
+      //      fprintf(STDERR, 'LineReader: %s', $newData);
       $buf .= $newData;
       $pos = strpos($buf, $this->delimiter);
       while ($pos !== FALSE) {

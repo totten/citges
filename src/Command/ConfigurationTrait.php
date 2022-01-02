@@ -18,12 +18,14 @@ trait ConfigurationTrait {
     $this->addOption('log', NULL, InputOption::VALUE_REQUIRED, 'Log file');
     $this->addOption('log-level', NULL, InputOption::VALUE_REQUIRED, 'Level of information to write to log file. If omitted, choose based on general verbosity. (debug|info|notice|warning|error|critical|alert|emergency)');
     $this->addOption('log-format', NULL, InputOption::VALUE_REQUIRED, 'How to format log info (text|json)', 'text');
+    $this->addOption('pipe', NULL, InputOption::VALUE_REQUIRED, 'Connect via pipe (launcher command)');
   }
 
   protected function createConfiguration(InputInterface $input, OutputInterface $output): Configuration {
     // Wouldn't it be nicer to have some attribute/annotation mapping...
 
     $map = [
+      'pipe' => 'pipeCommand',
       'log' => 'logFile',
       'log-level' => 'logLevel',
       'log-format' => 'logFormat',
