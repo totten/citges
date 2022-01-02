@@ -29,8 +29,8 @@ class Queue5Test extends TestCase {
   }
 
   public function testQueue() {
-    $this->cvEval('queue_example_reset("qx");');
-    $this->cvEval('queue_example_addlogme("qx", range(0,5));');
+    $this->cvEval('queue_example_reset("qx?bg");');
+    $this->cvEval('queue_example_addlogme("qx?bg", range(1,5));');
     $this->execute('run', [
       '--pipe' => $this->cvCmd('ev "Civi::pipe();"'),
     ]);
