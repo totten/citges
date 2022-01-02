@@ -2,7 +2,6 @@
 
 namespace Civi\Citges\Util;
 
-use Civi\Citges\Exception\JsonRpcMethodException;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 
@@ -40,16 +39,18 @@ class PromiseUtil {
   public function dump(string $message = ''): array {
     return [
       function ($response) use ($message) {
-        fwrite(STDERR, $message . print_r(['resp' => $response, 1]));
+        fwrite(STDERR, $message . print_r(['resp' => $response, 1]) . "\n");
+        return $response;
       },
-      function (\Throwable $err) use ($message) {
-        if ($err instanceof JsonRpcMethodException) {
-          fwrite(STDERR, $message . 'Promise failed: ' . print_r($err->raw, 1));
-        }
-        else {
-          fwrite(STDERR, $message . 'Promise failed: ' . $err->getTraceAsString());
-        }
-      },
+    //      function (\Throwable $err) use ($message) {
+    //        if ($err instanceof JsonRpcMethodException) {
+    //          fwrite(STDERR, $message . 'Promise failed: ' . print_r($err->raw, 1) . "\n");
+    //        }
+    //        else {
+    //          fwrite(STDERR, $message . sprintf("Promise failed: %s: %s\n%s",
+    //            get_class($err), $err->getMessage(), $err->getTraceAsString()));
+    //        }
+    //      },
     ];
   }
 
