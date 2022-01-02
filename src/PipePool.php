@@ -216,6 +216,24 @@ class PipePool {
   }
 
   /**
+   * Determine if the pool has any "open" slots. A slot is considered open if
+   * either (a) there is no worker in the slot or (b) there is an idle worker.
+   *
+   * @return bool
+   */
+  public function hasOpenSlot(): bool {
+    if (count($this->connections) < $this->configuration->maxWorkers) {
+      return TRUE;
+    }
+    foreach ($this->connections as $connection) {
+      if ($connection->isIdle()) {
+        return TRUE;
+      }
+    }
+    return FALSE;
+  }
+
+  /**
    * @param string $context
    * @return \React\Promise\PromiseInterface
    *   A promise for the new/started instance of PipeConnection.
