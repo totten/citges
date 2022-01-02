@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "30b74da5a61cd962897d06690ba5c795",
+    "content-hash": "fa0ddfa5b097a925c5a949e7c00991bb",
     "packages": [
         {
             "name": "civicrm/composer-downloads-plugin",
@@ -127,6 +127,77 @@
                 }
             ],
             "time": "2021-10-20T14:07:33+00:00"
+        },
+        {
+            "name": "clue/mq-react",
+            "version": "v1.4.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/clue/reactphp-mq.git",
+                "reference": "3f2ea2c2947522022ba5ff6c52267fa3f2c0f193"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/clue/reactphp-mq/zipball/3f2ea2c2947522022ba5ff6c52267fa3f2c0f193",
+                "reference": "3f2ea2c2947522022ba5ff6c52267fa3f2c0f193",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3",
+                "react/promise": "^2.2.1 || ^1.2.1"
+            },
+            "require-dev": {
+                "clue/block-react": "^1.0",
+                "phpunit/phpunit": "^9.3 || ^5.7 || ^4.8.35",
+                "react/event-loop": "^1.2",
+                "react/http": "^1.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Clue\\React\\Mq\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Christian Lück",
+                    "email": "christian@clue.engineering"
+                }
+            ],
+            "description": "Mini Queue, the lightweight in-memory message queue to concurrently do many (but not too many) things at once, built on top of ReactPHP",
+            "homepage": "https://github.com/clue/reactphp-mq",
+            "keywords": [
+                "Mini Queue",
+                "async",
+                "concurrency",
+                "job",
+                "message",
+                "message queue",
+                "queue",
+                "rate limit",
+                "reactphp",
+                "throttle",
+                "worker"
+            ],
+            "support": {
+                "issues": "https://github.com/clue/reactphp-mq/issues",
+                "source": "https://github.com/clue/reactphp-mq/tree/v1.4.0"
+            },
+            "funding": [
+                {
+                    "url": "https://clue.engineering/support",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/clue",
+                    "type": "github"
+                }
+            ],
+            "time": "2021-11-15T10:50:53+00:00"
         },
         {
             "name": "evenement/evenement",
