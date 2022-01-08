@@ -36,7 +36,7 @@ class PromiseUtil {
     }
   }
 
-  public function dump(string $message = ''): array {
+  public static function dump(string $message = ''): array {
     return [
       function ($response) use ($message) {
         fwrite(STDERR, $message . print_r(['resp' => $response, 1]) . "\n");
