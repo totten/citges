@@ -84,6 +84,7 @@ class CiviQueueWatcher {
   }
 
   public function start(): PromiseInterface {
+    $this->logger->info('Starting');
     $this->lastFillTime = NULL;
     $this->addStep = new \Clue\React\Mq\Queue(1, NULL, function ($args) {
       return $this->onNextStep($args);
@@ -92,6 +93,7 @@ class CiviQueueWatcher {
   }
 
   public function stop(): PromiseInterface {
+    $this->logger->info('Stopping');
     $this->moribundDeferred = new Deferred();
     return $this->moribundDeferred->promise();
   }
@@ -102,6 +104,7 @@ class CiviQueueWatcher {
 
   protected function fillSteps(): PromiseInterface {
     if ($this->moribundDeferred) {
+      $this->logger->debug('Finished pending queue tasks');
       $this->addStep = NULL;
       $this->lastFillTime = NULL;
       $this->moribundDeferred->resolve();
@@ -145,7 +148,7 @@ class CiviQueueWatcher {
     $now = microtime(1);
     $nextFillTime = $this->lastFillTime + static::POLL_INTERVAL;
     $waitTime = $nextFillTime - $now;
-    return $waitTime > 0 ? React\Promise\Timer\sleep($waitTime) : resolve();
+    return $waitTime > 0 ? \React\Promise\Timer\resolve($waitTime) : resolve();
   }
 
   protected function onNextStep(array $args): PromiseInterface {
