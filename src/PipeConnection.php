@@ -108,7 +108,7 @@ class PipeConnection {
       }
     });
 
-    $this->log->info("Forked");
+    $this->log->debug("Forked");
     return $this->deferred->promise();
   }
 
@@ -135,7 +135,7 @@ class PipeConnection {
       return $deferred->promise();
     }
 
-    $this->log->debug("Send request", ['requestLine' => $requestLine]);
+    $this->log->debug("Send request: $requestLine");
     $this->process->stdin->write($requestLine . $this->delimiter);
     return $deferred->promise();
   }
@@ -189,6 +189,7 @@ class PipeConnection {
    * @internal
    */
   public function onReadLine(string $responseLine): void {
+    $this->log->debug("Receive response: $responseLine");
     if ($this->deferred) {
       $this->releaseDeferred()->resolve($responseLine);
     }

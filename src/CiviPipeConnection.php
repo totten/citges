@@ -2,6 +2,7 @@
 
 namespace Civi\Citges;
 
+use Civi\Citges\Util\IdUtil;
 use Civi\Citges\Util\JsonRpc;
 use Monolog\Logger;
 use React\Promise\PromiseInterface;
@@ -56,6 +57,7 @@ class CiviPipeConnection {
           return reject(new \Exception(sprintf("Expected minimum CiviCRM version %s. Received welcome: %s\n", self::MINIMUM_VERSION, $welcomeLine)));
         }
         $this->welcome = $welcome;
+        $this->logger->notice('Connected', ['Civi::pipe' => $welcome['Civi::pipe']]);
         return $welcome['Civi::pipe'];
       });
   }
@@ -70,14 +72,14 @@ class CiviPipeConnection {
   }
 
   public function request(string $method, array $params = [], ?string $caller = NULL): PromiseInterface {
-    static $id;
-    ++$id;
+    $id = IdUtil::next(__CLASS__ . '::request');
 
     $requestLine = JsonRpc::createRequest($method, $params, $id);
     $request = ['method' => $method, 'params' => $params, 'caller' => $caller];
-    $this->logger->info('Request line: ' . $requestLine);
+    // $this->logger->debug(sprintf('Send request #%s: %s', $id, $requestLine));
     return $this->pipeConnection->run($requestLine)
       ->then(function(string $responseLine) use ($request, $id) {
+        // $this->logger->debug(sprintf('Receive response #%s: %s', $id, $responseLine));
         return JsonRpc::parseResponse($responseLine, $id, $request);
       });
   }

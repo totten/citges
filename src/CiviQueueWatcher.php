@@ -2,6 +2,7 @@
 
 namespace Civi\Citges;
 
+use Civi\Citges\Util\PromiseUtil;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use function React\Promise\resolve;
@@ -110,6 +111,7 @@ class CiviQueueWatcher {
       $this->moribundDeferred->resolve();
       return resolve();
     }
+    $this->logger->debug('Poll queues');
     $this->lastFillTime = microtime(1);
     return $this->ctl->api4('Queue', 'get', ['where' => [['is_autorun', '=', TRUE]]])
       ->then(function ($queues) {
@@ -118,19 +120,23 @@ class CiviQueueWatcher {
         }
         $this->addStep(['finishInterval']);
         $this->addStep(['fillSteps']);
+        // $this->logger->debug('Polling: Check {count} queues', ['count' => count($queues)]);
       });
   }
 
   protected function runQueueItem(string $queueName): PromiseInterface {
+    $this->logger->debug('Poll queue ({name})', ['name' => $queueName]);
     return $this->ctl
       ->api4('Queue', 'claimItem', ['queue' => $queueName])
-      ->then(function ($items) {
+      ->then(function ($items) use ($queueName) {
         // claimItem is specified to return 0 or 1 items.
         if (empty($items)) {
+          $this->logger->debug('Nothing in queue {name}', ['name' => $queueName]);
           return resolve();
         }
 
         $item = array_shift($items);
+        $this->logger->debug('Run queue ({name}) item', ['name' => $queueName, 'item' => $item]);
         fprintf(STDERR, "FIXME: Run %s via PipePool\n", print_r($item, 1));
         return $this->ctl->api4('Queue', 'deleteItem', [
           'item' => $item,
