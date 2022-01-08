@@ -69,11 +69,17 @@ class CiviPipeConnection {
     return $this->pipeConnection->stop($timeout);
   }
 
-  public function request(string $method, array $params = []): PromiseInterface {
-    $request = JsonRpc::createRequest($method, $params);
-    $this->logger->info('Request line: ' . $request);
-    return $this->pipeConnection->run($request)
-      ->then([JsonRpc::class, 'parseResponse']);
+  public function request(string $method, array $params = [], ?string $caller = NULL): PromiseInterface {
+    static $id;
+    ++$id;
+
+    $requestLine = JsonRpc::createRequest($method, $params, $id);
+    $request = ['method' => $method, 'params' => $params, 'caller' => $caller];
+    $this->logger->info('Request line: ' . $requestLine);
+    return $this->pipeConnection->run($requestLine)
+      ->then(function(string $responseLine) use ($request, $id) {
+        return JsonRpc::parseResponse($responseLine, $id, $request);
+      });
   }
 
   /**
@@ -84,7 +90,7 @@ class CiviPipeConnection {
    * @see \Civi\Pipe\PublicMethods::api3()
    */
   public function api3(string $entity, string $action, array $params = []): PromiseInterface {
-    return $this->request('api3', [$entity, $action, $params]);
+    return $this->request('api3', [$entity, $action, $params], $this->findCaller(2));
   }
 
   /**
@@ -95,7 +101,7 @@ class CiviPipeConnection {
    * @see \Civi\Pipe\PublicMethods::api4()
    */
   public function api4(string $entity, string $action, array $params = []): PromiseInterface {
-    return $this->request('api4', [$entity, $action, $params]);
+    return $this->request('api4', [$entity, $action, $params], $this->findCaller(2));
   }
 
   /**
@@ -104,7 +110,7 @@ class CiviPipeConnection {
    * @see \Civi\Pipe\PublicMethods::login()
    */
   public function login(array $params): PromiseInterface {
-    return $this->request('login', $params);
+    return $this->request('login', $params, $this->findCaller(2));
   }
 
   /**
@@ -113,7 +119,14 @@ class CiviPipeConnection {
    * @see \Civi\Pipe\PublicMethods::options()
    */
   public function options(array $params): PromiseInterface {
-    return $this->request('options', $params);
+    return $this->request('options', $params, $this->findCaller(2));
+  }
+
+  protected function findCaller(int $steps): string {
+    $trace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, $steps);
+    $caller = array_pop($trace);
+    $result = sprintf('%s @ %s', $caller['file'], $caller['line']);
+    return $result;
   }
 
 }
