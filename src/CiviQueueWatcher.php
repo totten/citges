@@ -2,7 +2,8 @@
 
 namespace Civi\Citges;
 
-use Civi\Citges\Util\PromiseUtil;
+use Evenement\EventEmitterTrait;
+use React\EventLoop\Loop;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
 use function React\Promise\resolve;
@@ -24,6 +25,8 @@ use function React\Promise\resolve;
  * When you call `stop()`, the current loop will wrap-up before finishing.
  */
 class CiviQueueWatcher {
+
+  use EventEmitterTrait;
 
   /**
    * How frequently to poll for tasks.
@@ -84,13 +87,28 @@ class CiviQueueWatcher {
     $this->logger = $logger;
   }
 
+  /**
+   * Start watching the Civi queues and executing their tasks.
+   *
+   * @return \React\Promise\PromiseInterface
+   *   Notifies when the queue-watcher has started
+   *   its round-robin polling.
+   *
+   *   Tip: If you instead want a notification when the queue-watcher
+   *   has wrapped up all operations, use `$queueWatcher->on('stop', ...)`.
+   */
   public function start(): PromiseInterface {
     $this->logger->info('Starting');
     $this->lastFillTime = NULL;
+    // The round-robin scan has a variable number of steps.
+    // We store these steps in a local, sequential (concurrency=1) data-store.
     $this->addStep = new \Clue\React\Mq\Queue(1, NULL, function ($args) {
       return $this->onNextStep($args);
     });
-    return $this->addStep(['fillSteps']);
+    Loop::addTimer(static::POLL_INTERVAL, function() {
+      $this->addStep(['fillSteps']);
+    });
+    return resolve();
   }
 
   public function stop(): PromiseInterface {
@@ -109,6 +127,7 @@ class CiviQueueWatcher {
       $this->addStep = NULL;
       $this->lastFillTime = NULL;
       $this->moribundDeferred->resolve();
+      $this->emit('stop');
       return resolve();
     }
     $this->logger->debug('Poll queues');
