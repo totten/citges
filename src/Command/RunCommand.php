@@ -6,7 +6,7 @@ use Civi\Citges\CiviPipeConnection;
 use Civi\Citges\CiviQueueWatcher;
 use Civi\Citges\PipeConnection;
 use Civi\Citges\PipePool;
-use Civi\Citges\Util\PromiseUtil;
+use React\Promise\Deferred;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -68,31 +68,40 @@ class RunCommand extends Command {
     //   'work' => $workChannel,
     // ]);
 
-    $ctl = new CiviPipeConnection(new PipeConnection($config, 'ctl'), $this->logger->withName('CtlConn'));
+    $ctl = new CiviPipeConnection(
+      new PipeConnection($config, 'ctl', $this->logger->withName('CtlPipe')),
+      $this->logger->withName('CtlConn'));
     $work = new PipePool($config, $this->logger->withName('WorkPool'));
 
     await($ctl->start()
-      ->then(...PromiseUtil::dump())
+      // ->then(...PromiseUtil::dump())
       ->then(function (array $welcome) use ($ctl) {
         if (($welcome['t'] ?? NULL) === 'trusted') {
           // OK, we can execute Queue APIs.
           return $ctl->options(['apiCheckPermissions' => FALSE]);
         }
         else {
-          reject(new \Exception("citges requires trusted connection"));
+          return reject(new \Exception("citges requires trusted connection"));
           // Alternatively, if $header['l']==='login' and you have login-credentials,
           // then perform a login.
         }
       })
-      ->then(...PromiseUtil::dump())
+      // ->then(...PromiseUtil::dump())
       ->then(function () use ($ctl, $config, $work) {
-        // return $ctl->api4('Queue', 'get', [
-        //   'where' => [['is_autorun', '=', TRUE]],
-        // ]);
+        $waitForStop = new Deferred();
         $watcher = new CiviQueueWatcher($config, $ctl, $work, $this->logger->withName('CiviQueueWatcher'));
-        return $watcher->start();
+        $watcher->on('stop', function() use ($waitForStop) {
+          $waitForStop->resolve();
+        });
+        $watcher->start();
+        return $waitForStop->promise();
+
+        // Loop::addTimer(5, function() use ($watcher) {
+        //   fwrite(STDERR, "Time to stop!\n");
+        //   $watcher->stop();
+        // });
+
       })
-      ->then(...PromiseUtil::dump())
     );
   }
 
