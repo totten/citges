@@ -14,7 +14,7 @@ use function React\Promise\reject;
  */
 class CiviPipeConnection {
 
-  const MINIMUM_VERSION = '5.46.alpha1';
+  const MINIMUM_VERSION = '5.47.alpha1';
   //  const MINIMUM_VERSION = '5.49.alpha1';
 
   /**
