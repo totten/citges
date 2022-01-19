@@ -1,5 +1,5 @@
 #!/bin/bash
-echo '{"Civi::pipe":"0.1"}'
+echo '{"Civi::pipe":{"v":"5.47.alpha1","t":"trusted","d":"dummy-inf.sh"}}'
 
 i=0
 while true ; do

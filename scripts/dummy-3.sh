@@ -1,5 +1,5 @@
 #!/bin/bash
-echo '{"Civi::pipe":"0.1"}'
+echo '{"Civi::pipe":{"v":"5.47.alpha1","t":"trusted","d":"dummy-3.sh"}}'
 
 read A
 echo "Thanks for A=$A"
