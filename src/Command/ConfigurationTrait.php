@@ -15,9 +15,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 trait ConfigurationTrait {
 
   public function configureCommonOptions() {
+    $this->addOption('config', 'c', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Load a configuration file');
+    $this->addOption('define', 'd', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Define a config option (KEY=VALUE)', []);
     $this->addOption('log', NULL, InputOption::VALUE_REQUIRED, 'Log file');
-    $this->addOption('log-level', NULL, InputOption::VALUE_REQUIRED, 'Level of information to write to log file. If omitted, choose based on general verbosity. (debug|info|notice|warning|error|critical|alert|emergency)');
-    $this->addOption('log-format', NULL, InputOption::VALUE_REQUIRED, 'How to format log info (text|json)', 'text');
     $this->addOption('pipe', NULL, InputOption::VALUE_REQUIRED, 'Connect via pipe (launcher command)');
   }
 
@@ -27,16 +27,39 @@ trait ConfigurationTrait {
     $map = [
       'pipe' => 'pipeCommand',
       'log' => 'logFile',
-      'log-level' => 'logLevel',
-      'log-format' => 'logFormat',
     ];
 
     $cfg = new Configuration();
+
+    foreach ($input->getOption('config') as $configFile) {
+      if (!file_exists($configFile)) {
+        continue;
+      }
+
+      if (preg_match(';\.json$;', $configFile)) {
+        $parse = json_decode(file_get_contents($configFile), TRUE);
+        if (!is_array($parse)) {
+          throw new \RuntimeException("Malformed configuration file: $configFile");
+        }
+        foreach ($parse as $cfgOption => $inputValue) {
+          $cfg->{$cfgOption} = $inputValue;
+        }
+      }
+      else {
+        $output->writeln("<error>Skipped unrecognized config file: $configFile</error>");
+      }
+    }
+
     foreach ($map as $inputOption => $cfgOption) {
       $inputValue = $input->getOption($inputOption);
       if ($inputValue !== '') {
         $cfg->{$cfgOption} = $inputValue;
       }
+    }
+
+    foreach ($input->getOption('define') as $configOptionValue) {
+      [$cfgOption, $inputValue] = explode('=', $configOptionValue, 2);
+      $cfg->{$cfgOption} = $inputValue;
     }
 
     if (empty($cfg->logLevel)) {
