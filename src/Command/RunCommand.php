@@ -34,16 +34,16 @@ class RunCommand extends Command {
         "\n" .
         "<comment>Examples: Web (HTTPS):</comment>\n" .
         "\n" .
-        "  citges run --web='https://user:pass@example.com/civicrm/queue'\n" .
+        "  coworker run --web='https://user:pass@example.com/civicrm/queue'\n" .
         "\n" .
         "<comment>Examples: Pipe (Shell/SSH/etc):</comment>\n" .
-        "  citges run\n" .
-        "  citges run --pipe='cv ev \"Civi::pipe();\"'\n" .
-        "  citges run --pipe='drush ev \"civicrm_initialize(); Civi::pipe();\"' \n" .
-        "  citges run --pipe='wp eval \"civicrm_initialize(); Civi::pipe();\"'\n" .
+        "  coworker run\n" .
+        "  coworker run --pipe='cv ev \"Civi::pipe();\"'\n" .
+        "  coworker run --pipe='drush ev \"civicrm_initialize(); Civi::pipe();\"' \n" .
+        "  coworker run --pipe='wp eval \"civicrm_initialize(); Civi::pipe();\"'\n" .
         //  "\n" .
         //  "<comment>Examples: Hybrid (HTTPS+SSH):</comment>\n" .
-        //  "  citges run --channel=web,pipe \\\n" .
+        //  "  coworker run --channel=web,pipe \\\n" .
         //  "    --web='https://user:pass@example.com/civicrm/queue' \\\n" .
         //  "    --pipe='ssh worker@example.com cv ev \"Civi::pipe();\"'\n" .
         "\n"
@@ -81,7 +81,7 @@ class RunCommand extends Command {
           return $ctl->options(['apiCheckPermissions' => FALSE]);
         }
         else {
-          return reject(new \Exception("citges requires trusted connection"));
+          return reject(new \Exception("coworker requires trusted connection"));
           // Alternatively, if $header['l']==='login' and you have login-credentials,
           // then perform a login.
         }

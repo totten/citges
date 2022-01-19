@@ -1,10 +1,10 @@
-# citges
+# coworker
 
-`citges` is a task runner for CiviCRM.  It aims to execute tasks quickly and to enforce resource-limits.  Key features:
+`coworker` is a task runner for CiviCRM.  It aims to execute tasks quickly and to enforce resource-limits.  Key features:
 
-* `citges` launches via command-line, crontab, or systemd.
-* `citges` runs tasks on local or remote systems.
-* `citges` connects to remote systems via SSH or HTTPS.
+* `coworker` launches via command-line, crontab, or systemd.
+* `coworker` runs tasks on local or remote systems.
+* `coworker` connects to remote systems via SSH or HTTPS.
 
 ## Dependencies
 
@@ -15,15 +15,15 @@
 ## Download
 
 ```
-sudo wget 'https://FIXME/citges.phar' -O '/usr/local/bin/citges'
-sudo chmod +x /usr/local/bin/citges
+sudo wget 'https://FIXME/coworker.phar' -O '/usr/local/bin/coworker'
+sudo chmod +x /usr/local/bin/coworker
 ```
 
 (*FIXME: composer-require and composer-download*)
 
 ## Usage
 
-The `citges run` command connects to CiviCRM, requests pending tasks, and executes them. This requires a communication channel, and each communication
+The `coworker run` command connects to CiviCRM, requests pending tasks, and executes them. This requires a communication channel, and each communication
 channel has different properties:
 
 | Communication Channel | Description | Compatibility | Latency | RAM/CPU Limits |
@@ -37,7 +37,7 @@ channel has different properties:
 To run tasks remotely using HTTP:
 
 ```
-citges run --web='https://user:pass@example.com/civicrm/queue'
+coworker run --web='https://user:pass@example.com/civicrm/queue'
 ```
 
 (*FIXME: discuss credentials management, authx, etc; maybe rework as pure JWT?*)
@@ -58,21 +58,21 @@ Coworker may start a CiviCRM process and exchange data through a pipe. However, 
   is optimized for background work.
 * __Weaknesses__: Setup requires higher level of sysadmin access (minimally, SSH access; ideally, `sudo` or `root` access).
 
-There are several ways to start `citges` with a CiviCRM pipe.  These may use [cv](https://github.com/civicrm/cv), [drush](https://drush.org), or
+There are several ways to start `coworker` with a CiviCRM pipe.  These may use [cv](https://github.com/civicrm/cv), [drush](https://drush.org), or
 [wp-cli](https://wp-cli.org/), as in:
 
 ```bash
 ## Start with cv
 cd /var/www/example.com/web
-citges run --pipe='cv ev "Civi::pipe();"'
+coworker run --pipe='cv ev "Civi::pipe();"'
 
 ## Start with drush
 cd /var/www/example.com/web
-citges run --pipe='drush ev "civicrm_initialize(); Civi::pipe();"'
+coworker run --pipe='drush ev "civicrm_initialize(); Civi::pipe();"'
 
 ## Start with wp-cli
 cd /var/www/example.com/web
-citges run --pipe='wp eval "civicrm_initialize(); Civi::pipe();"'
+coworker run --pipe='wp eval "civicrm_initialize(); Civi::pipe();"'
 ```
 
 There is a common theme in the examples: the `--pipe` parameter specifies a shell command, and the shell command ultimately invokes PHP's `Civi::pipe()`.  As long as the
@@ -110,7 +110,7 @@ In this example, we monitor for new tasks with a long-running SSH pipe, and then
 execute specific tasks with medium-latency HTTPS requests.
 
 ```bash
-citges run --channel=pipe,web \
+coworker run --channel=pipe,web \
   --pipe='ssh webuser@backend.example.com cv ev --cwd=/var/www/example.com/web ev "Civi::pipe();"' \
   --web='https://user:pass@example.com/civicrm/queue'
 ```

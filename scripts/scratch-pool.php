@@ -3,12 +3,12 @@
 
 ini_set('display_errors', 1);
 if (PHP_SAPI !== 'cli') {
-  printf("citges is a command-line tool. It is designed to run with PHP_SAPI \"%s\". The active PHP_SAPI is \"%s\".\n", 'cli', PHP_SAPI);
+  printf("coworker is a command-line tool. It is designed to run with PHP_SAPI \"%s\". The active PHP_SAPI is \"%s\".\n", 'cli', PHP_SAPI);
   printf("TIP: In a typical shell environment, the \"php\" command should execute php-cli - not php-cgi or similar.\n");
   exit(1);
 }
 if (version_compare(PHP_VERSION, '7.2', '<')) {
-  echo "citges requires PHP 7.2+\n";
+  echo "coworker requires PHP 7.2+\n";
   exit(2);
 }
 $found = 0;

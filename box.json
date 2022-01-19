@@ -11,7 +11,7 @@
         }
     ],
     "git-version": "package_version",
-    "main": "bin/citges",
-    "output": "bin/citges.phar",
+    "main": "bin/coworker",
+    "output": "bin/coworker.phar",
     "stub": true
 }

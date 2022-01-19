@@ -11,7 +11,7 @@ class Application extends \Symfony\Component\Console\Application {
    * Primary entry point for execution of the standalone command.
    */
   public static function main($binDir) {
-    $application = new Application('citges', '@package_version@');
+    $application = new Application('coworker', '@package_version@');
     $application->run();
   }
 

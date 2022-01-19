@@ -2,6 +2,6 @@
 .composer-downloads
 /.idea
 /bin/box
-/bin/citges.phar
+/bin/coworker.phar
 /bin/phpunit
 /vendor
