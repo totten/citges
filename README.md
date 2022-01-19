@@ -1,12 +1,20 @@
 # coworker
 
-`coworker` is a task runner for CiviCRM.  It aims to execute tasks quickly and to enforce resource-limits.  Key features:
+Civi `coworker` is a helper for CiviCRM -- it allows CiviCRM to run tasks in the background.
 
-* `coworker` launches via command-line, crontab, or systemd.
-* `coworker` runs tasks on local or remote systems.
-* `coworker` connects to remote systems via SSH or HTTPS.
+## Benefits
 
-## Dependencies
+There are other paradigms for background processing in CiviCRM. `coworker` is distinct in supporting all of these features (simultaneously):
+
+* __Generic__: `coworker` can execute diverse tasks, as defined by CiviCRM extensions. The sysadmin is not required to manually setup bespoke/per-task runners.
+* __Compatible__: `coworker` is compatible with several deployment topologies - such as dedicated hosts, cloud hosts, and local hosts.
+  Coworker can use local processes, SSH connections, and/or HTTP(S) connections.
+* __Performant__: `coworker` can execute tasks with minimal delay (seconds or milliseconds - rather than minutes or hours).
+* __Progressive enhancement__: `coworker` is compatible with almost any CiviCRM topology, but it gets progressively better if the deployment topology permits.
+* __Resource limits__: `coworker` respects multiple resource limits, such as #workers, worker-lifetime, and #requests-per-worker.
+* __Redundancy__: A single CiviCRM deployment can have multiple `coworker`s. If one goes offline, the others continue.
+
+## Requirements
 
 * Required: PHP v7.2+
 * Required: CiviCRM (*FIXME: Version number*)
@@ -14,12 +22,41 @@
 
 ## Download
 
+Download `coworker` as a system-wide utility:
+
 ```
 sudo wget 'https://FIXME/coworker.phar' -O '/usr/local/bin/coworker'
 sudo chmod +x /usr/local/bin/coworker
 ```
 
-(*FIXME: composer-require and composer-download*)
+Download `coworker` as an add-on for your existing `composer` (D8+) project:
+
+```javascript
+{
+    "require": {
+        "civicrm/composer-downloads-plugin": "~2.1|^3",
+    },
+    "extra": {
+        "downloads": {
+            "coworker": {
+                "version": "F.I.X.M.E",
+                "url": "https://FIXME/coworker-{$version}.phar",
+                "path": "bin/coworker",
+                "type": "phar"
+            }
+        }
+    }
+}
+```
+
+Download `coworker` for patching or development:
+
+```
+git clone https://FIXME/coworker.git
+cd coworker
+composer install
+```
+
 
 ## Usage
 
@@ -140,3 +177,17 @@ Or run all of them:
 ```bash
 CV_TEST_BUILD='/path/to/site/root' phpunit8 --debug
 ```
+
+# Known limitations
+
+* If you are adding `coworker` into an existing `composer` project (eg Drupal 8+), it is conceivable to download via
+  `composer require civicrm/coworker`.  However, this technique may not serve you well in the long-run.  Why?
+  Internally, `coworker` is built with [ReactPHP](https://reactphp.org) - which is an excellent framework for juggling
+  concurrent tasks, but it is qualitatively very different from a traditional PHP application (like Drupal).  To
+  minimize dependency-conflicts and confusion, one should keep a clear, clean separation between these frameworks.  The
+  techniques described earlier ("[Download](#download)") strike a balance: separating the frameworks while also allowing
+  interoperability and co-deployment.
+    * _Idea: If someone really wants the benefits of `composer require`/`composer update`, then
+      please look at setting up a bridge-project, eg `composer require civicrm/coworker-phar-drupal`.
+      A bridge-project would download the PHAR, add a wrapper in `vendor/bin/coworker`, and change the
+      default configuration to use a drush pipe._
