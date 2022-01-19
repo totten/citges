@@ -7,17 +7,17 @@ class Configuration {
   /**
    * @var int
    */
-  public $maxWorkers = 2;
+  public $maxConcurrentWorkers = 2;
 
   /**
    * @var int
    */
-  public $maxRequests = 10;
+  public $maxWorkerRequests = 10;
 
   /**
    * @var int
    */
-  public $maxDuration = 10 * 60;
+  public $maxWorkerDuration = 10 * 60;
 
   /**
    * Whenever we hit the maximum, we have to remove some old workers.
