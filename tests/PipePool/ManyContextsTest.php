@@ -1,8 +1,8 @@
 <?php
 
-namespace Civi\Citges\PipePool;
+namespace Civi\Coworker\PipePool;
 
-use Civi\Citges\PipePool;
+use Civi\Coworker\PipePool;
 
 /**
  * 8 tasks across 5 contexts (A-E; 1-2 tasks per context). Limit of 5 concurrent workers.

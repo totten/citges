@@ -1,8 +1,8 @@
 <?php
 
-namespace Civi\Citges\Command;
+namespace Civi\Coworker\Command;
 
-use Civi\Citges\CitgesTestTrait;
+use Civi\Coworker\CoworkerTestTrait;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
  */
 class RunCommandUnitTest extends TestCase {
 
-  use CitgesTestTrait;
+  use CoworkerTestTrait;
 
   protected function setUp(): void {
     parent::setUp();

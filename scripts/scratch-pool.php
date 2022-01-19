@@ -30,7 +30,7 @@ if (!$found) {
 function main() {
   printf("\n## Run %s %s()\n\n", basename(__FILE__), __FUNCTION__);
 
-  $cfg = new \Civi\Citges\Configuration();
+  $cfg = new \Civi\Coworker\Configuration();
   $cfg->pipeCommand = 'bash ' . escapeshellarg(__DIR__ . '/dummy-inf.sh');
   // $cfg->pipeCommand = 'bash ' . escapeshellarg(__DIR__ . '/dummy-3.sh');
 
@@ -38,7 +38,7 @@ function main() {
   $log->pushHandler(new \Monolog\Handler\StreamHandler(STDERR));
   $log->pushProcessor(new \Monolog\Processor\PsrLogMessageProcessor());
 
-  $pool = new \Civi\Citges\PipePool($cfg, $log);
+  $pool = new \Civi\Coworker\PipePool($cfg, $log);
   $pool->start()
     ->then(function () use ($pool) {
       $all = [];

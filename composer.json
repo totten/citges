@@ -14,7 +14,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Civi\\Citges\\": "src/"
+            "Civi\\Coworker\\": "src/"
          }
     },
     "require": {

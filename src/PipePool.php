@@ -1,10 +1,10 @@
 <?php
 
-namespace Civi\Citges;
+namespace Civi\Coworker;
 
-use Civi\Citges\Util\FunctionUtil;
-use Civi\Citges\Util\IdUtil;
-use Civi\Citges\Util\PromiseUtil;
+use Civi\Coworker\Util\FunctionUtil;
+use Civi\Coworker\Util\IdUtil;
+use Civi\Coworker\Util\PromiseUtil;
 use Monolog\Logger;
 use React\EventLoop\Loop;
 use React\Promise\PromiseInterface;
@@ -23,7 +23,7 @@ class PipePool {
 
   /**
    * Keyed by ID
-   * @var \Civi\Citges\PipeConnection[]
+   * @var \Civi\Coworker\PipeConnection[]
    */
   private $connections = [];
 
@@ -35,7 +35,7 @@ class PipePool {
   private $todos = [];
 
   /**
-   * @var \Civi\Citges\Configuration
+   * @var \Civi\Coworker\Configuration
    */
   private $configuration;
 
@@ -112,7 +112,7 @@ class PipePool {
         return;
       }
 
-      /** @var \Civi\Citges\Todo $todo */
+      /** @var \Civi\Coworker\Todo $todo */
       $todo = $this->todos[0];
       $startTodo = function() use ($todo) {
         if ($todo !== $this->todos[0]) {
@@ -184,7 +184,7 @@ class PipePool {
 
     $sorted = new \SplPriorityQueue();
     foreach ($this->connections as $connection) {
-      /** @var \Civi\Citges\PipeConnection $connection */
+      /** @var \Civi\Coworker\PipeConnection $connection */
       $score = $getScore($connection);
       $this->log->debug('cleanupConnections: scored {conn} as {score}', ['conn' => $connection->toString(), 'score' => $score]);
       if ($score > 0) {
@@ -194,7 +194,7 @@ class PipePool {
 
     $removedCount = 0;
     foreach ($sorted as $connection) {
-      /** @var \Civi\Citges\PipeConnection $connection */
+      /** @var \Civi\Coworker\PipeConnection $connection */
       if ($removedCount >= $goalCount) {
         break;
       }

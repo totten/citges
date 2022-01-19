@@ -1,5 +1,5 @@
 <?php
-namespace Civi\Citges;
+namespace Civi\Coworker;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -53,7 +53,7 @@ class Application extends \Symfony\Component\Console\Application {
    */
   public function createCommands($context = 'default') {
     $commands = array();
-    $commands[] = new \Civi\Citges\Command\RunCommand();
+    $commands[] = new \Civi\Coworker\Command\RunCommand();
     return $commands;
   }
 

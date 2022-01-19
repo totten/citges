@@ -1,8 +1,8 @@
 <?php
 
-namespace Civi\Citges;
+namespace Civi\Coworker;
 
-use Civi\Citges\Util\IdUtil;
+use Civi\Coworker\Util\IdUtil;
 use React\Promise\Deferred;
 
 /**

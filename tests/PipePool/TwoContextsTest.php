@@ -1,8 +1,8 @@
 <?php
 
-namespace Civi\Citges\PipePool;
+namespace Civi\Coworker\PipePool;
 
-use Civi\Citges\PipePool;
+use Civi\Coworker\PipePool;
 
 /**
  * A single worker handles 8 tasks across 2 contexts (A-B).

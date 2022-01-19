@@ -1,8 +1,8 @@
 <?php
 
-namespace Civi\Citges\PipePool;
+namespace Civi\Coworker\PipePool;
 
-use Civi\Citges\PipePool;
+use Civi\Coworker\PipePool;
 
 /**
  * Create several workers. Each runs only a single task.

@@ -1,6 +1,6 @@
 <?php
 
-namespace Civi\Citges\Util;
+namespace Civi\Coworker\Util;
 
 use React\ChildProcess\Process;
 use React\EventLoop\Loop;

@@ -1,11 +1,11 @@
 <?php
 
-namespace Civi\Citges;
+namespace Civi\Coworker;
 
-use Civi\Citges\Util\IdUtil;
-use Civi\Citges\Util\LifetimeStatsTrait;
-use Civi\Citges\Util\LineReader;
-use Civi\Citges\Util\ProcessUtil;
+use Civi\Coworker\Util\IdUtil;
+use Civi\Coworker\Util\LifetimeStatsTrait;
+use Civi\Coworker\Util\LineReader;
+use Civi\Coworker\Util\ProcessUtil;
 use Monolog\Logger;
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;
@@ -48,7 +48,7 @@ class PipeConnection {
   protected $process;
 
   /**
-   * @var \Civi\Citges\Util\LineReader
+   * @var \Civi\Coworker\Util\LineReader
    */
   protected $lineReader;
 

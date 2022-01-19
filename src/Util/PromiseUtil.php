@@ -1,6 +1,6 @@
 <?php
 
-namespace Civi\Citges\Util;
+namespace Civi\Coworker\Util;
 
 use React\Promise\Deferred;
 use React\Promise\PromiseInterface;

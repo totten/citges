@@ -1,10 +1,10 @@
 <?php
-namespace Civi\Citges;
+namespace Civi\Coworker;
 
 use React\Promise\PromiseInterface;
 use Symfony\Component\Console\Tester\CommandTester;
 
-trait CitgesTestTrait {
+trait CoworkerTestTrait {
 
   protected function setupE2E() {
     $copyIfNew = function($from, $to) {

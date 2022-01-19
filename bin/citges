@@ -25,4 +25,4 @@ foreach ($autoloaders as $autoloader) {
 if (!$found) {
   die("Failed to find autoloader");
 }
-\Civi\Citges\Application::main(__DIR__);
+\Civi\Coworker\Application::main(__DIR__);

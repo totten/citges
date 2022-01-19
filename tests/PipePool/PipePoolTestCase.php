@@ -1,11 +1,11 @@
 <?php
 
-namespace Civi\Citges\PipePool;
+namespace Civi\Coworker\PipePool;
 
-use Civi\Citges\CitgesTestTrait;
-use Civi\Citges\Configuration;
-use Civi\Citges\PipePool;
-use Civi\Citges\Util\FileUtil;
+use Civi\Coworker\CoworkerTestTrait;
+use Civi\Coworker\Configuration;
+use Civi\Coworker\PipePool;
+use Civi\Coworker\Util\FileUtil;
 use Monolog\Handler\StreamHandler;
 use Monolog\Handler\TestHandler;
 use Monolog\Logger;
@@ -15,7 +15,7 @@ use function React\Promise\all;
 
 abstract class PipePoolTestCase extends TestCase {
 
-  use CitgesTestTrait;
+  use CoworkerTestTrait;
 
   /**
    * @var \Monolog\Handler\TestHandler

@@ -1,8 +1,8 @@
 <?php
 
-namespace Civi\Citges\Command;
+namespace Civi\Coworker\Command;
 
-use Civi\Citges\Configuration;
+use Civi\Coworker\Configuration;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\AbstractProcessingHandler;

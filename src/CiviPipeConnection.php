@@ -1,9 +1,9 @@
 <?php
 
-namespace Civi\Citges;
+namespace Civi\Coworker;
 
-use Civi\Citges\Util\IdUtil;
-use Civi\Citges\Util\JsonRpc;
+use Civi\Coworker\Util\IdUtil;
+use Civi\Coworker\Util\JsonRpc;
 use Monolog\Logger;
 use React\Promise\PromiseInterface;
 use function React\Promise\reject;
@@ -18,7 +18,7 @@ class CiviPipeConnection {
   //  const MINIMUM_VERSION = '5.49.alpha1';
 
   /**
-   * @var \Civi\Citges\PipeConnection
+   * @var \Civi\Coworker\PipeConnection
    */
   protected $pipeConnection;
 
@@ -33,7 +33,7 @@ class CiviPipeConnection {
   protected $welcome;
 
   /**
-   * @param \Civi\Citges\PipeConnection $pipeConnection
+   * @param \Civi\Coworker\PipeConnection $pipeConnection
    * @param \Monolog\Logger|NULL $logger
    */
   public function __construct($pipeConnection, ?\Monolog\Logger $logger) {
@@ -44,7 +44,7 @@ class CiviPipeConnection {
   /**
    * @return \React\Promise\PromiseInterface
    *   Promise<array> - List of header flags
-   * @see \Civi\Citges\PipeConnection::start()
+   * @see \Civi\Coworker\PipeConnection::start()
    */
   public function start(): PromiseInterface {
     return $this->pipeConnection->start()
@@ -65,7 +65,7 @@ class CiviPipeConnection {
   /**
    * @param float $timeout
    * @return \React\Promise\PromiseInterface
-   * @see \Civi\Citges\PipeConnection::stop
+   * @see \Civi\Coworker\PipeConnection::stop
    */
   public function stop(float $timeout = 1.5): PromiseInterface {
     return $this->pipeConnection->stop($timeout);

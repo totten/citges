@@ -1,9 +1,9 @@
 <?php
 
-namespace Civi\Citges\Util;
+namespace Civi\Coworker\Util;
 
-use Civi\Citges\Exception\JsonRpcMethodException;
-use Civi\Citges\Exception\JsonRpcProtocolException;
+use Civi\Coworker\Exception\JsonRpcMethodException;
+use Civi\Coworker\Exception\JsonRpcProtocolException;
 use React\Promise\PromiseInterface;
 use function React\Promise\reject;
 use function React\Promise\resolve;

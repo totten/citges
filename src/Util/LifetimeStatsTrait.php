@@ -1,8 +1,8 @@
 <?php
 
-namespace Civi\Citges\Util;
+namespace Civi\Coworker\Util;
 
-use Civi\Citges\Configuration;
+use Civi\Coworker\Configuration;
 
 trait LifetimeStatsTrait {
 

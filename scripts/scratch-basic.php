@@ -29,7 +29,7 @@ if (!$found) {
 function main(string $salt = '') {
   printf("\n## Run %s %s(%s)\n\n", basename(__FILE__), __FUNCTION__, $salt);
 
-  $cfg = new \Civi\Citges\Configuration();
+  $cfg = new \Civi\Coworker\Configuration();
   $cfg->pipeCommand = 'bash ' . escapeshellarg(__DIR__ . '/dummy-inf.sh');
   // $cfg->pipeCommand = 'bash ' . escapeshellarg(__DIR__ . '/dummy-3.sh');
 
@@ -37,7 +37,7 @@ function main(string $salt = '') {
   $log->pushHandler(new \Monolog\Handler\StreamHandler(STDERR));
   $log->pushProcessor(new \Monolog\Processor\PsrLogMessageProcessor());
 
-  $pipe = new \Civi\Citges\PipeConnection($cfg, NULL, $log);
+  $pipe = new \Civi\Coworker\PipeConnection($cfg, NULL, $log);
   $pipe->start()->then(function($welcome) use ($pipe, $salt) {
     echo "0. Welcomed with \"$welcome\"\n";
     return $pipe->run("first $salt");

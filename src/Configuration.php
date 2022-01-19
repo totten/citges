@@ -1,6 +1,6 @@
 <?php
 
-namespace Civi\Citges;
+namespace Civi\Coworker;
 
 class Configuration {
 

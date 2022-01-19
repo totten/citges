@@ -1,8 +1,8 @@
 <?php
 
-namespace Civi\Citges\E2E;
+namespace Civi\Coworker\E2E;
 
-use Civi\Citges\CitgesTestTrait;
+use Civi\Coworker\CoworkerTestTrait;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -10,7 +10,7 @@ use PHPUnit\Framework\TestCase;
  */
 class Queue5Test extends TestCase {
 
-  use CitgesTestTrait;
+  use CoworkerTestTrait;
 
   /**
    * @var string|null

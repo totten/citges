@@ -1,6 +1,6 @@
 <?php
 
-namespace Civi\Citges\Exception;
+namespace Civi\Coworker\Exception;
 
 class JsonRpcMethodException extends \Exception {
 

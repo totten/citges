@@ -1,11 +1,11 @@
 <?php
 
-namespace Civi\Citges\Command;
+namespace Civi\Coworker\Command;
 
-use Civi\Citges\CiviPipeConnection;
-use Civi\Citges\CiviQueueWatcher;
-use Civi\Citges\PipeConnection;
-use Civi\Citges\PipePool;
+use Civi\Coworker\CiviPipeConnection;
+use Civi\Coworker\CiviQueueWatcher;
+use Civi\Coworker\PipeConnection;
+use Civi\Coworker\PipePool;
 use React\Promise\Deferred;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

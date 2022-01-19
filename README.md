@@ -51,7 +51,7 @@ This method comes with some trade-offs:
 ### Usage: Pipe
 
 In Unix-style systems, a *pipe* is a flexible and performant mechanism for exchanging data and commands. To allow quicker processing of background tasks,
-Citges may start a CiviCRM process and exchange data through a pipe. However, the setup process may require greater access and more steps.
+Coworker may start a CiviCRM process and exchange data through a pipe. However, the setup process may require greater access and more steps.
 
 * __Strengths__: Once a pipe is started, it can be used repeatedly - which enables faster polling and reduced latency. Piped processes may be
   allowed to use additional resources (RAM and CPU time) that are unavailable to web requests. Piped processes use a pooling strategy that
