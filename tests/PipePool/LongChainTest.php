@@ -10,7 +10,7 @@ use Civi\Coworker\PipePool;
  * We never use the full limit of 4 concurrent workers because the tasks are organized
  * as a linear chain - so we only need 1 worker at a time.
  *
- * In theory, 1 worker could handle all 5 requests. However, due to maxRequests=3,
+ * In theory, 1 worker could handle all 5 requests. However, due to maxWorkerRequests=3,
  * the first worker will be replaced after 3 requests.
  *
  * @group unit
@@ -19,8 +19,8 @@ class LongChainTest extends PipePoolTestCase {
 
   protected function buildConfig(): array {
     return [
-      'maxWorkers' => 4,
-      'maxRequests' => 3,
+      'maxConcurrentWorkers' => 4,
+      'maxWorkerRequests' => 3,
       'pipeCommand' => $this->getPath('scripts/dummy-inf.sh'),
     ];
   }
@@ -40,7 +40,7 @@ class LongChainTest extends PipePoolTestCase {
           $this->assertEquals('processed request #3 (Apple 300)', $resp);
           return $pool->dispatch('A', 'Apple 400');
         })
-        // Per maxRequests, that was the last time we could reuse the worker! New worker started.
+        // Per maxWorkerRequests, that was the last time we could reuse the worker! New worker started.
         ->then(function($resp) use ($pool) {
           $this->assertEquals('processed request #1 (Apple 400)', $resp);
           return $pool->dispatch('A', 'Apple 500');

@@ -18,8 +18,8 @@ class TwoWorkerTest extends PipePoolTestCase {
 
   protected function buildConfig(): array {
     return [
-      'maxWorkers' => 2,
-      'maxRequests' => 100,
+      'maxConcurrentWorkers' => 2,
+      'maxWorkerRequests' => 100,
       'pipeCommand' => $this->getPath('scripts/dummy-inf.sh'),
     ];
   }

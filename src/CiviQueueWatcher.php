@@ -43,7 +43,7 @@ class CiviQueueWatcher {
 
   /**
    * FIXME: Shouldn't we be restrting the ctl connection periodically?
-   * Maybe it should build on a PipePool of maxWorkers=1?
+   * Maybe it should build on a PipePool of maxConcurrentWorkers=1?
    *
    * @var \Civi\Coworker\CiviPipeConnection
    */

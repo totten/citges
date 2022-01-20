@@ -16,8 +16,8 @@ class TwoContextsTest extends PipePoolTestCase {
 
   protected function buildConfig(): array {
     return [
-      'maxWorkers' => 1,
-      'maxRequests' => 100,
+      'maxConcurrentWorkers' => 1,
+      'maxWorkerRequests' => 100,
       'pipeCommand' => $this->getPath('scripts/dummy-inf.sh'),
     ];
   }
