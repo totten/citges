@@ -93,7 +93,7 @@ class PipeConnection {
     // We will receive a 1-line welcome which signals that startup has finished.
     $this->reserveDeferred();
 
-    $this->process = new \React\ChildProcess\Process($this->configuration->pipeCommand);
+    $this->process = new \React\ChildProcess\Process($this->configuration->pipeCommand, NULL, $this->buildEnv());
     $this->process->start();
     // $this->process->stdin->on('data', [$this, 'onReceive']);
     $this->lineReader = new LineReader($this->process->stdout, $this->delimiter);
@@ -238,6 +238,19 @@ class PipeConnection {
 
   public function toString() {
     return sprintf('PipeConnection(%s,%s)', $this->id, $this->context);
+  }
+
+  /**
+   * @return array
+   */
+  private function buildEnv(): array {
+    $env = getenv();
+    if (isset($env['SHELL_VERBOSITY']) && $env['SHELL_VERBOSITY'] > 1) {
+      // We often delegate to PHARs, which are often built with `box`, and `box`s
+      // super-verbose mode interferes with the protocol.
+      $env['SHELL_VERBOSITY'] = 1;
+    }
+    return $env;
   }
 
 }
