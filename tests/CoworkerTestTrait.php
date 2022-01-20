@@ -75,7 +75,7 @@ trait CoworkerTestTrait {
    */
   protected function cvCmd(string $cmd): string {
     $cvRoot = getenv('CV_TEST_BUILD');
-    $this->assertTrue(is_dir($cvRoot));
+    $this->assertTrue(is_dir($cvRoot), "CV_TEST_BUILD ($cvRoot) should be a valid root");
     $cvCmd = sprintf('cv --cwd=%s %s', escapeshellarg($cvRoot), $cmd);
     return $cvCmd;
   }
