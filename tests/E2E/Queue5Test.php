@@ -33,6 +33,7 @@ class Queue5Test extends TestCase {
     $this->cvEval('queue_example_addlogme("qx?bg", range(1,5));');
     $this->execute('run', [
       '--pipe' => $this->cvCmd('ev "Civi::pipe();"'),
+      '--define' => ['maxTotalDuration=5'],
     ]);
     $lines = $this->parseJsonLines($this->logFile);
     $this->assertCount(5, $lines);
