@@ -12,6 +12,16 @@ class Configuration {
   public $maxConcurrentWorkers = 2;
 
   /**
+   * Maximum amount of time (seconds) for which the overall system should run (inclusive of any/all workers).
+   *
+   * After reaching this limit, no more workers will be started, and no more tasks
+   * will be executed.
+   *
+   * @var int|null
+   */
+  public $maxTotalDuration = NULL;
+
+  /**
    * Maximum number of tasks to assign a single worker.
    *
    * After reaching this limit, no more tasks will be given to the worker.

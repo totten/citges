@@ -6,6 +6,7 @@ use Civi\Coworker\CiviPipeConnection;
 use Civi\Coworker\CiviQueueWatcher;
 use Civi\Coworker\PipeConnection;
 use Civi\Coworker\PipePool;
+use React\EventLoop\Loop;
 use React\Promise\Deferred;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -87,20 +88,25 @@ class RunCommand extends Command {
         }
       })
       // ->then(...PromiseUtil::dump())
+      ->then(function() use ($work) {
+          return $work->start();
+      })
       ->then(function () use ($ctl, $config, $work) {
         $waitForStop = new Deferred();
         $watcher = new CiviQueueWatcher($config, $ctl, $work, $this->logger->withName('CiviQueueWatcher'));
         $watcher->on('stop', function() use ($waitForStop) {
+          $this->logger->info('Stopped');
           $waitForStop->resolve();
         });
-        $watcher->start();
+        $watcher->start()->then(function() use ($config, $watcher) {
+          if (!empty($config->maxTotalDuration)) {
+            Loop::addTimer($config->maxTotalDuration, function() use ($watcher) {
+              $watcher->stop();
+            });
+          }
+        });
+
         return $waitForStop->promise();
-
-        // Loop::addTimer(5, function() use ($watcher) {
-        //   fwrite(STDERR, "Time to stop!\n");
-        //   $watcher->stop();
-        // });
-
       })
     );
   }
