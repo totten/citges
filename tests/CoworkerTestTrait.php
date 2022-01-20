@@ -34,10 +34,11 @@ trait CoworkerTestTrait {
   public function execute(string $commandName, array $args = []): \Symfony\Component\Console\Tester\CommandTester {
     $args = array_merge([
       'command' => $commandName,
-      '--log-level' => 'debug',
-      '--log-format' => 'json',
+      '--define' => [],
       '--verbose' => TRUE,
     ], $args);
+    array_unshift($args['--define'], 'logLevel=debug');
+    array_unshift($args['--define'], 'logFormat=json');
     $application = new Application();
     $command = $application->find($args['command']);
     $commandTester = new CommandTester($command);
