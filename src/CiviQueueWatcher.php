@@ -98,7 +98,7 @@ class CiviQueueWatcher {
    *   has wrapped up all operations, use `$queueWatcher->on('stop', ...)`.
    */
   public function start(): PromiseInterface {
-    $this->logger->info('Starting');
+    $this->logger->info('Starting...');
     $this->lastFillTime = NULL;
     // The round-robin scan has a variable number of steps.
     // We store these steps in a local, sequential (concurrency=1) data-store.
@@ -112,7 +112,7 @@ class CiviQueueWatcher {
   }
 
   public function stop(): PromiseInterface {
-    $this->logger->info('Stopping');
+    $this->logger->info('Stopping...');
     $this->moribundDeferred = new Deferred();
     return $this->moribundDeferred->promise();
   }
@@ -140,6 +140,12 @@ class CiviQueueWatcher {
         $this->addStep(['finishInterval']);
         $this->addStep(['fillSteps']);
         // $this->logger->debug('Polling: Check {count} queues', ['count' => count($queues)]);
+      }, function($error) {
+        // The latest request failed... but maybe we can try again...
+        // Note: If we don't try again, then `fillSteps()` will never detect shutdown.
+        $this->logger->error('Failed to read queues!', ['exception' => $error]);
+        $this->addStep(['finishInterval']);
+        $this->addStep(['fillSteps']);
       });
   }
 
