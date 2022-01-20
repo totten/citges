@@ -5,16 +5,26 @@ namespace Civi\Coworker;
 class Configuration {
 
   /**
+   * Maximum number of workers that may be running at the same time.
+   *
    * @var int
    */
   public $maxConcurrentWorkers = 2;
 
   /**
+   * Maximum number of tasks to assign a single worker.
+   *
+   * After reaching this limit, no more tasks will be given to the worker.
+   *
    * @var int
    */
   public $maxWorkerRequests = 10;
 
   /**
+   * Maximum amount of time (seconds) for which a single worker should execute.
+   *
+   * After reaching this limit, no more tasks will be given to the worker.
+   *
    * @var int
    */
   public $maxWorkerDuration = 10 * 60;
