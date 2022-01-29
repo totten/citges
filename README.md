@@ -4,17 +4,18 @@
 > general overview of scope, but it may be out-of-sync with the code and
 > depend on a mix of merged+unmerged core patches.__
 
-Civi `coworker` is a helper for CiviCRM -- it allows CiviCRM to run tasks in the background.
+Civi `coworker` is a task runner for CiviCRM -- it allows CiviCRM to run tasks in the background.
 
 ## Benefits
 
 There are other paradigms for background processing in CiviCRM. `coworker` is distinct in supporting all of these features (simultaneously):
 
+* __Multitasking__: `coworker` supports parallel execution of multiples tasks from multiple queues.
 * __Generic__: `coworker` can execute diverse tasks, as defined by CiviCRM extensions. The sysadmin is not required to manually setup bespoke/per-task runners.
 * __Compatible__: `coworker` is compatible with several deployment topologies - such as dedicated hosts, cloud hosts, and local hosts.
   Coworker can use local processes, SSH connections, and/or HTTP(S) connections.
 * __Performant__: `coworker` can execute tasks with minimal delay (seconds or milliseconds - rather than minutes or hours).
-* __Progressive enhancement__: `coworker` is compatible with almost any CiviCRM topology, but it gets progressively better if the deployment topology permits.
+* __Progressive enhancement__: `coworker` is compatible with almost any CiviCRM deployment type, but it gets progressively better if the deployment's technology permits.
 * __Resource limits__: `coworker` respects multiple resource limits, such as #workers, worker-lifetime, and #requests-per-worker.
 * __Redundancy__: A single CiviCRM deployment can have multiple `coworker`s. If one goes offline, the others continue.
 
