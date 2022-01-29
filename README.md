@@ -1,5 +1,9 @@
 # coworker
 
+> __This project is in an early/pre-release phase.  The README gives a
+> general overview of scope, but it may be out-of-sync with the code and
+> depend on a mix of merged+unmerged core patches.__
+
 Civi `coworker` is a helper for CiviCRM -- it allows CiviCRM to run tasks in the background.
 
 ## Benefits
