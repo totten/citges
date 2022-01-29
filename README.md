@@ -8,7 +8,7 @@ Civi `coworker` is a task runner for CiviCRM -- it allows CiviCRM to run tasks i
 
 ## Benefits
 
-There are other paradigms for background processing in CiviCRM. `coworker` is distinct in supporting all of these features (simultaneously):
+There are other paradigms for background processing in CiviCRM. `coworker` is distinct in *simultaneously* these features:
 
 * __Multitasking__: `coworker` supports parallel execution of multiples tasks from multiple queues.
 * __Generic__: `coworker` can execute diverse tasks, as defined by CiviCRM extensions. The sysadmin is not required to manually setup bespoke/per-task runners.
@@ -62,8 +62,7 @@ cd coworker
 composer install
 ```
 
-
-## Usage
+## Connections
 
 The `coworker run` command connects to CiviCRM, requests pending tasks, and executes them. This requires a communication channel, and each communication
 channel has different properties:
@@ -73,6 +72,12 @@ channel has different properties:
 | `web` | Send HTTP requests to a remote CiviCRM web server. | All web servers | Medium-high latency | Assigned by web-server |
 | `pipe` (local) | Send bidirectional messages to a long-running CiviCRM process. | Servers with full sysadmin access | Low latency | Configurable |
 | `pipe` (SSH/etc) | Send bidirectional messages to a long-running CiviCRM process. | Remote servers with SSH access (or similar) | Mixed (high-latency setup; low-latency message) | Configurable |
+
+* __Compatibility__: Which CiviCRM deployments can use this type of connection?
+* __Latency__: How quickly do tasks start when using this type of connection?
+* __RAM/CPU Limits__: How are limits set for tasks?
+
+## Usage
 
 ### Usage: HTTP
 
