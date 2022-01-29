@@ -11,7 +11,7 @@ function queue_example_logme($ctx, $logValue) {
   if (!$log || !file_exists($log) || !is_writable($log)) {
     throw new Exception('Undefined variable: QUEUE_EXAMPLE_LOG');
   }
-  $msg = json_encode(['t' => time(), 'v' => $logValue]);
+  $msg = json_encode(['t' => time(), 'v' => $logValue]) . "\n";
   file_put_contents($log, $msg, FILE_APPEND);
 }
 
