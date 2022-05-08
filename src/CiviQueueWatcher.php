@@ -151,9 +151,10 @@ class CiviQueueWatcher {
 
   protected function runQueueItem(string $queueName): PromiseInterface {
     $this->logger->debug('Poll queue ({name})', ['name' => $queueName]);
+    $item = NULL;
     return $this->ctl
       ->api4('Queue', 'claimItem', ['queue' => $queueName])
-      ->then(function ($items) use ($queueName) {
+      ->then(function ($items) use ($queueName, &$item) {
         // claimItem is specified to return 0 or 1 items.
         if (empty($items)) {
           $this->logger->debug('Nothing in queue {name}', ['name' => $queueName]);
@@ -162,8 +163,9 @@ class CiviQueueWatcher {
 
         $item = array_shift($items);
         $this->logger->debug('Run queue ({name}) item', ['name' => $queueName, 'item' => $item]);
-        fprintf(STDERR, "FIXME: Run %s via PipePool\n", print_r($item, 1));
-        return $this->ctl->api4('Queue', 'deleteItem', [
+        fprintf(STDERR, "FIXME: Run %s via PipePool\n", json_encode($item));
+        // FIXME: dispatch to PipePool not to ctl
+        return $this->ctl->api4('Queue', 'runItem', [
           'item' => $item,
         ]);
       });
